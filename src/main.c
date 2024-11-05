@@ -9,6 +9,9 @@
 // lib or deps headers
 #include <cjson/cJSON.h>
 
+// source headers
+#include "shell.h"
+
 //! \brief Main function of the program.
 int main(int argc, char* argv[])
 {
@@ -16,6 +19,8 @@ int main(int argc, char* argv[])
     // Args no usados
     (void)argc;
     (void)argv;
+
+    start_shell();
 
     return EXIT_SUCCESS;
 }

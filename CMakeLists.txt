@@ -27,7 +27,7 @@ find_package(unity REQUIRED)
 
 # add_executable => .exe/library
 # add_library => .a/.so/.dll STATIC SHARED
-add_executable(${PROJECT_NAME} src/main.c)
+add_executable(${PROJECT_NAME} ${SOURCES} src/main.c)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE cjson::cjson unity::unity)
 
