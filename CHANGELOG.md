@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2-alpha]
+
+### Added
+
+- Activity 2 implemented: Internal commands. Remaining commands 'quit' and 'echo' were finished.
+
 ## [0.1-alpha.3] - 2024-10-06
 
 ### Added

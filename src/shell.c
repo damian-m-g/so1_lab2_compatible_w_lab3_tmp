@@ -43,7 +43,7 @@ void start_shell()
                     {
                         // No old current directory, show error message
                         errno = ENOENT;
-                        _perror("No such thing as 'OLDPWD' for now");
+                        _perror("ERROR: No such thing as 'OLDPWD' for now");
                     }
                     else
                     {
@@ -51,7 +51,7 @@ void start_shell()
                         if (chdir(old_cwd) == -1)
                         {
                             // Some problem commited and the current working dir change can't be done
-                            _perror("Error changing cwd to the old one");
+                            _perror("ERROR: Issue changing cwd to the old one");
                         }
                         else
                         {
@@ -68,7 +68,7 @@ void start_shell()
                     if (chdir(second_token) == -1)
                     {
                         // The argument is wrong or another problem appeared
-                        _perror("Can't change current working directory");
+                        _perror("ERROR: Can't change current working directory");
                     }
                     else
                     {
@@ -95,18 +95,34 @@ void start_shell()
             // Check existence of argument
             if(second_token != NULL)
             {
-                // Argument provided
-
+                // Argument provided; check if it starts with '$', in which case it's referencing a env var
+                if (second_token[0] == '$')
+                {
+                    const char *env_val = getenv(&second_token[1]);
+                    if (env_val == NULL)
+                    {
+                        // No env var with thy name or any other issue; errno doesn't get set, so puts()
+                        puts("ERROR: Unexistent env var or empty arg provided.");
+                    }
+                    else
+                    {
+                        puts(env_val);
+                    }
+                }
+                else
+                {
+                    puts(second_token);
+                }
             }
             else
             {
                 // No argument; a newline gets printed
-
+                puts("");
             }
         }
         else if (strcmp(first_token, "quit") == 0)
         {
-
+            return;
         }
     }
 }
