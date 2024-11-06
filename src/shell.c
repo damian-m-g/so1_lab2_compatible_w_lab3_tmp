@@ -24,7 +24,7 @@ void start_shell()
         fgets(input, sizeof(input), stdin);
         // Get first and potential second token to inquire if this is an internal command
         static char *first_token, *second_token;
-        first_token = strtok(input, " \n");
+        first_token = strtok(input, TOKEN_SEPARATOR);
         // If the input is null, do nothing. Iterate again
         if (first_token == NULL) continue;
         // Potential second token grabs the rest of the input; could be null
@@ -87,7 +87,8 @@ void start_shell()
         }
         else if (strcmp(first_token, "clr") == 0)
         {
-
+            printf(CLR_ANSI_EC);
+            fflush(stdout);
         }
         else if (strcmp(first_token, "echo") == 0)
         {
