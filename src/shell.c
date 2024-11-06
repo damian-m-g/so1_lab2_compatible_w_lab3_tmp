@@ -22,5 +22,98 @@ void start_shell()
         // Buffer for the input
         static char input[ARG_MAX];
         fgets(input, sizeof(input), stdin);
+        // Get first and potential second token to inquire if this is an internal command
+        static char *first_token, *second_token;
+        first_token = strtok(input, " \n");
+        // If the input is null, do nothing. Iterate again
+        if (first_token == NULL) continue;
+        // Potential second token grabs the rest of the input; could be null
+        second_token = strtok(NULL, "\n");
+        if (strcmp(first_token, "cd") == 0)
+        {
+            // Check existence of argument
+            if (second_token != NULL)
+            {
+                // Argument provided
+                if (strcmp(second_token, "-") == 0)
+                {
+                    // Return to old current directory (if exist)
+                    const char *old_cwd = getenv(ENV_OLDPWD_KEY);
+                    if (old_cwd == NULL)
+                    {
+                        // No old current directory, show error message
+                        errno = ENOENT;
+                        _perror("No such thing as 'OLDPWD' for now");
+                    }
+                    else
+                    {
+                        // Old current directory exist, head to it if possible and update env
+                        if (chdir(old_cwd) == -1)
+                        {
+                            // Some problem commited and the current working dir change can't be done
+                            _perror("Error changing cwd to the old one");
+                        }
+                        else
+                        {
+                            // Success
+                            setenv(ENV_OLDPWD_KEY, cwd, 1);
+                            setenv(ENV_PWD_KEY, old_cwd, 1);
+                            getcwd(cwd, sizeof(cwd));
+                        }
+                    }
+                }
+                else
+                {
+                    // Try to move to a new current directory
+                    if (chdir(second_token) == -1)
+                    {
+                        // The argument is wrong or another problem appeared
+                        _perror("Can't change current working directory");
+                    }
+                    else
+                    {
+                        // The arguments is right, proceed with the normal procedure
+                        setenv(ENV_OLDPWD_KEY, cwd, 1);
+                        setenv(ENV_PWD_KEY, second_token, 1);
+                        getcwd(cwd, sizeof(cwd));
+                    }
+                }
+            }
+            else
+            {
+                // No argument; the current directory shall be provided
+                printf("%s\n", cwd);
+            }
+        }
+        else if (strcmp(first_token, "clr") == 0)
+        {
+
+        }
+        else if (strcmp(first_token, "echo") == 0)
+        {
+            // Check existence of argument
+            if(second_token != NULL)
+            {
+                // Argument provided
+
+            }
+            else
+            {
+                // No argument; a newline gets printed
+
+            }
+        }
+        else if (strcmp(first_token, "quit") == 0)
+        {
+
+        }
     }
+}
+
+void _perror(const char* s)
+{
+    perror(s);
+    // Sadly some IDEs and shells don't flush stderr right away, even with fflush()
+    fflush(stderr);
+    usleep(TERMINAL_FLUSH_DELAY);
 }
