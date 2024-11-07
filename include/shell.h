@@ -32,9 +32,22 @@
 #define MAX_TOKENS_PER_COMMAND 32
 
 /**
- * @brief Starts the custom shell.
+ * @brief Starts the custom shell main loop.
  */
-void start_shell(void);
+void start_shell_ml(void);
+
+/**
+ * @brief Executes certain command, could be an internal one, external one, or unexistent.
+ * @param command Path to the batch file.
+ * @param cwd Current working directory. This variable could be updated inside.
+ */
+void execute_command(char* command, char* cwd);
+
+/**
+ * @brief Tries to execute a certain (no comments, one line per command) batch file.
+ * @param path Path to the batch file.
+ */
+void execute_batch_file(const char* path);
 
 /**
  * @brief Monkeypatch of perror and fprintf(stderr, ...). Needed due to "bad" management of some IDE/Shell terminals.

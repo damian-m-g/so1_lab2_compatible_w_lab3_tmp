@@ -7,13 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.3-alpha]
+## [0.4-alpha] - 2024-10-07
+
+### Added
+
+- Activity 4 implemented: support for batch files.
+
+### Changed
+
+- start_shell() refactorized into start_shell_ml() and execute_command().
+
+### Fixed
+
+- Used macros instead of hardcoded numbers for exit status on chid process going wrong.
+- Redundant code removed.
+
+## [0.3-alpha] - 2024-10-07
 
 ### Added
 
 - Activity 3 implemented: Invocation of external programs.
 
-## [0.2-alpha]
+## [0.2-alpha] - 2024-10-06
 
 ### Added
 
