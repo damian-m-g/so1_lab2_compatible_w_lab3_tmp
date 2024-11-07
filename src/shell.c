@@ -5,6 +5,7 @@
 
 #include "shell.h"
 
+// TODO: Refactorize after completion.
 // WIP: ...
 void start_shell()
 {
@@ -43,7 +44,7 @@ void start_shell()
                     {
                         // No old current directory, show error message
                         errno = ENOENT;
-                        _perror("ERROR: No such thing as 'OLDPWD' for now");
+                        _wstderr("ERROR: No such thing as 'OLDPWD' for now", true);
                     }
                     else
                     {
@@ -51,7 +52,7 @@ void start_shell()
                         if (chdir(old_cwd) == -1)
                         {
                             // Some problem commited and the current working dir change can't be done
-                            _perror("ERROR: Issue changing cwd to the old one");
+                            _wstderr("ERROR: Issue changing cwd to the old one", true);
                         }
                         else
                         {
@@ -68,7 +69,7 @@ void start_shell()
                     if (chdir(second_token) == -1)
                     {
                         // The argument is wrong or another problem appeared
-                        _perror("ERROR: Can't change current working directory");
+                        _wstderr("ERROR: Can't change current working directory", true);
                     }
                     else
                     {
@@ -124,12 +125,68 @@ void start_shell()
         {
             return;
         }
+        else
+        {
+            // Potential external command invocation
+            const pid_t pid_child = fork();
+            if (pid_child == -1)
+            {
+                _wstderr("ERROR: forking of current process failed", true);
+                continue;
+            }
+            else if (pid_child == 0)
+            {
+                // Child process, needs to take apart through exec; *second_token* must be subtokenized
+                char *argv[MAX_TOKENS_PER_COMMAND + 1];
+                argv[LOWEST_ARR_INDEX] = first_token;
+                int argc = LOWEST_ARR_INDEX + 1;
+                char *token = strtok(second_token, TOKEN_SEPARATOR);
+                while (token != NULL && argc < MAX_TOKENS_PER_COMMAND) {
+                    argv[argc++] = token;
+                    token = strtok(NULL, TOKEN_SEPARATOR);
+                }
+                // Check if max amount of tokens were reached and more of them are available to consume
+                if (argc == MAX_TOKENS_PER_COMMAND && token != NULL)
+                {
+                    _wstderr("ERROR: You surpassed the arguments limit for a command.", true);
+                    exit(-1);
+                }
+                // Reached this line, the limits of argument were respected; "close" the argv list
+                argv[argc] = NULL;
+                if (execvp(first_token, argv) == -1)
+                {
+                    // Something went wrong
+                    _wstderr("ERROR: Command couldn't be executed", true);
+                    exit(-1);
+                }
+                // This line should never be reached if all went good
+                exit(-1);
+            }
+            // Parent process (child never reaches next lines); wait for child to finish
+            int status;
+            if (waitpid(pid_child, &status, 0) == -1)
+            {
+                _wstderr("ERROR: waitpid() failed", true);
+            }
+            if (WEXITSTATUS(status) == -1)
+            {
+                // This error doesn't set errno
+                _wstderr("ERROR: In forked process.\n", false);
+            }
+        }
     }
 }
 
-void _perror(const char* s)
+void _wstderr(const char* s, bool use_perror)
 {
-    perror(s);
+    if (use_perror)
+    {
+        perror(s);   
+    }
+    else
+    {
+        fwrite(s, sizeof(char), strlen(s), stderr);
+    }
     // Sadly some IDEs and shells don't flush stderr right away, even with fflush()
     fflush(stderr);
     usleep(TERMINAL_FLUSH_DELAY);
