@@ -7,7 +7,8 @@
 #include <stdlib.h>
 
 // lib or deps headers
-#include <cjson/cJSON.h>
+// TODO: For later usage.
+// #include <cjson/cJSON.h>
 
 // source headers
 #include "shell.h"

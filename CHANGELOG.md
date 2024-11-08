@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5-alpha] - 2024-10-08
+
+### Added
+
+- Activity 5 implemented: background execution.
+- Include guards added to source headers.
+- Job ID track.
+
+### Fixed
+
+- Small issues when passing length of certain arrays.
+
 ## [0.4-alpha] - 2024-10-07
 
 ### Added

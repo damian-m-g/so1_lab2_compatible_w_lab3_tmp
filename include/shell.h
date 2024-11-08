@@ -3,6 +3,10 @@
  * @brief Custom shell related logic declaration
  */
 
+#ifndef SHELL_H
+#define SHELL_H
+
+#include "cmd_utils.h"
 #include <stdlib.h>
 #include <unistd.h>
 #include <linux/limits.h>
@@ -57,3 +61,5 @@ void execute_batch_file(const char* path);
  * @return NULL
  */
 void _wstderr(const char* s, bool use_perror);
+
+#endif

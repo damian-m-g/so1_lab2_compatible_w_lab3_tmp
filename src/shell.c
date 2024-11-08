@@ -10,9 +10,9 @@ void start_shell_ml()
     // Get the 3 parts that conform the command line prompt
     const char *user = getenv(ENV_USER_KEY);
     char host[HOST_NAME_MAX + 1];
-    gethostname(host, sizeof(host));
+    gethostname(host, (HOST_NAME_MAX + 1));
     char cwd[PATH_MAX];
-    getcwd(cwd, sizeof(cwd));
+    getcwd(cwd, PATH_MAX);
 
     // Main loop
     while (true)
@@ -27,6 +27,9 @@ void start_shell_ml()
 
 void execute_command(char* command, char* cwd)
 {
+    // Prepare job counter
+    static unsigned long long int job_id = 0;
+    job_id++;
     // Get first and potential second token to inquire if this is an internal command
     static char *first_token, *second_token;
     first_token = strtok(command, TOKEN_SEPARATOR);
@@ -36,8 +39,10 @@ void execute_command(char* command, char* cwd)
     second_token = strtok(NULL, "\n");
     if (strcmp(first_token, "cd") == 0)
     {
+        // Ignore " &" if appears, as this is an internal command
+        is_background_exec(second_token);
         // Check existence of argument
-        if (second_token != NULL)
+        if (second_token != NULL && second_token[0] != '\0')
         {
             // Argument provided
             if (strcmp(second_token, "-") == 0)
@@ -62,8 +67,7 @@ void execute_command(char* command, char* cwd)
                     {
                         // Success
                         setenv(ENV_OLDPWD_KEY, cwd, 1);
-                        setenv(ENV_PWD_KEY, old_cwd, 1);
-                        getcwd(cwd, sizeof(cwd));
+                        getcwd(cwd, PATH_MAX);
                     }
                 }
             }
@@ -79,8 +83,7 @@ void execute_command(char* command, char* cwd)
                 {
                     // The arguments is right, proceed with the normal procedure
                     setenv(ENV_OLDPWD_KEY, cwd, 1);
-                    setenv(ENV_PWD_KEY, second_token, 1);
-                    getcwd(cwd, sizeof(cwd));
+                    getcwd(cwd, PATH_MAX);
                 }
             }
         }
@@ -97,8 +100,10 @@ void execute_command(char* command, char* cwd)
     }
     else if (strcmp(first_token, "echo") == 0)
     {
+        // Ignore " &" if appears, as this is an internal command
+        is_background_exec(second_token);
         // Check existence of argument
-        if(second_token != NULL)
+        if(second_token != NULL && second_token[0] != '\0')
         {
             // Argument provided; check if it starts with '$', in which case it's referencing a env var
             if (second_token[0] == '$')
@@ -131,6 +136,8 @@ void execute_command(char* command, char* cwd)
     }
     else
     {
+        // Check if " &" appears, in which case the command must be executed in the background
+        const bool background_execution = is_background_exec(second_token);
         // Potential external command invocation
         const pid_t pid_child = fork();
         if (pid_child == -1)
@@ -164,11 +171,22 @@ void execute_command(char* command, char* cwd)
                 exit(EXIT_FAILURE);
             }
         }
-        // Parent process (child never reaches next lines); wait for child to finish
-        int status;
-        if (waitpid(pid_child, &status, 0) == -1)
+        // Parent process (child never reaches next lines); wait for child to finish only if not a background proc
+        if (background_execution)
         {
-            _wstderr("ERROR: waitpid() failed", true);
+            // Concurrent execution
+            printf("[%llu] %d\n", job_id, (int)pid_child);
+            // Try that this output goes out first
+            fflush(stdout);
+        }
+        else
+        {
+            // Non concurrent execution, wait for child processto finish
+            int status;
+            if (waitpid(pid_child, &status, 0) == -1)
+            {
+                _wstderr("ERROR: waitpid() failed", true);
+            }
         }
     }
 }
@@ -177,7 +195,7 @@ void execute_batch_file(const char* path)
 {
     // Get current working directory
     char cwd[PATH_MAX];
-    getcwd(cwd, sizeof(cwd));
+    getcwd(cwd, PATH_MAX);
     // Open file
     FILE *file = fopen(path, "r");
     if (file == NULL)
