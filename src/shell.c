@@ -7,6 +7,12 @@
 
 void start_shell_ml()
 {
+    // The shell itself mustn't answer to certain signals
+    for (int i = LOWEST_ARR_INDEX; i < N_SINGALS_TO_HANDLE; i++)
+    {
+        signal(signals[i], SIG_IGN);
+    }
+
     // Get the 3 parts that conform the command line prompt
     const char *user = getenv(ENV_USER_KEY);
     char host[HOST_NAME_MAX + 1];
@@ -147,6 +153,15 @@ void execute_command(char* command, char* cwd)
         }
         else if (pid_child == 0)
         {
+            // If this child process is being executed in the foreground, certain signals must be absorved by it
+            if (!background_execution)
+            {
+                for (int i = LOWEST_ARR_INDEX; i < N_SINGALS_TO_HANDLE; i++)
+                {
+                    // Revert these signals managment to their default behavior
+                    signal(signals[i], SIG_DFL);
+                }
+            }
             // Child process, needs to take apart through exec; *second_token* must be subtokenized
             char *argv[MAX_TOKENS_PER_COMMAND + 1];
             argv[LOWEST_ARR_INDEX] = first_token;

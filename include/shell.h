@@ -17,6 +17,7 @@
 #include <getopt.h>
 #include <errno.h>
 #include <wait.h>
+#include <signal.h>
 
 //! \brief Environment variable key to retrieve the computer current user
 #define ENV_USER_KEY "USER"
@@ -34,6 +35,10 @@
 #define CLR_ANSI_EC "\033[H\033[J"
 //! \brief This shell has a max limit of tokens per command
 #define MAX_TOKENS_PER_COMMAND 32
+//! \brief Signals handled or not, depending on the process currently executed
+#define N_SINGALS_TO_HANDLE 4
+//! \brief Signals handled or not, depending on the process currently executed
+static const int signals[N_SINGALS_TO_HANDLE] = {SIGINT, SIGTERM, SIGTSTP, SIGQUIT};
 
 /**
  * @brief Starts the custom shell main loop.
