@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8-alpha] - 2024-10-10
+
+### Added
+
+- Activity 7 implemented: pipes.
+- Activity 8 implemented: io redirection.
+
+### Changed
+
+- Code completely refactorized.
+
+### Fixed
+
+- Small fixes.
+
 ## [0.6-alpha] - 2024-10-08
 
 ### Added
