@@ -19,31 +19,40 @@
 #include <wait.h>
 #include <signal.h>
 #include <fcntl.h>
+#include <time.h>
 
-//! \brief Environment variable key to retrieve the computer current user
+//! \brief Environment variable key to retrieve the computer current user.
 #define ENV_USER_KEY "USER"
-//! \brief First layer separator of smybols/tokens/words on a shell command, that creates single commands
+//! \brief First layer separator of smybols/tokens/words on a shell command, that creates single commands.
 #define SC_TOKEN_SEPARATOR "|"
-//! \brief Char or group of chars that define the separation of smybols/tokens/words on a single command
+//! \brief Char or group of chars that define the separation of smybols/tokens/words on a single command.
 #define TOKEN_SEPARATOR " "
-//! \brief Lowest array index
+//! \brief Lowest array index.
 #define LOWEST_ARR_INDEX 0
-//! \brief Environment variable key to retrieve the last ("old") current working directory
+//! \brief Environment variable key to retrieve the last ("old") current working directory.
 #define ENV_OLDPWD_KEY "OLDPWD"
-//! \brief Environment variable key to retrieve the current working directory
+//! \brief Environment variable key to retrieve the current working directory.
 #define ENV_PWD_KEY "PWD"
 //! \brief Average delay that some terminals (in IDEs, Shells, etc.) take to flush stdout/stderr, in microseconds.
 #define TERMINAL_FLUSH_DELAY 30000
-//! \brief ANSI escape codes that moves the cursor to the home position and clears the screen
+//! \brief ANSI escape codes that moves the cursor to the home position and clears the screen.
 #define CLR_ANSI_EC "\033[H\033[J"
-//! \brief This shell has a max limit of tokens per command
+//! \brief This shell has a max limit of tokens per command.
 #define MAX_TOKENS_PER_COMMAND 32
-//! \brief Amount of signals to handle, has direct relationship with the signals array
+//! \brief Amount of signals to handle, has direct relationship with the signals array.
 #define N_SINGALS_TO_HANDLE 4
-//! \brief Signals handled or not, depending on the process currently executed
+//! \brief Signals handled or not, depending on the process currently executed.
 static const int signals[N_SINGALS_TO_HANDLE] = {SIGINT, SIGTERM, SIGTSTP, SIGQUIT};
-//! \brief Maximum number of single commands to execute, given the max length allowed for an absolute command
+//! \brief Maximum number of single commands to execute, given the max length allowed for an absolute command.
 #define MAX_SINGLE_COMMANDS (ARG_MAX / 4)
+//! \brief Path to the metrics (lab #1) app.
+#define METRICS_APP_PATH "/opt/metrics"
+//! \brief A code, that the "metrics" app understands as "get status".
+# define METRICS_GET_STATUS_CODE 7
+//! \brief Seconds awaited to receive response from metrics app after a "get status" req, when executed in foreground.
+# define WAIT_T_FOR_METRICS_RESPONSE 3.0
+//! \brief Number of metrics returned by a "get status" by the metrics app.
+#define G_STATUS_N_METRICS_TRACKED 4
 
 /**
  * @brief Starts the custom shell main loop.
@@ -110,11 +119,31 @@ void execute_cd(char* input, char** sc_tokens, bool background_execution, char* 
 void execute_echo(char* input, char** sc_tokens, bool background_execution);
 
 /**
+ * @brief Executes the "stop_monitor" command, which stops the "metrics" app, if it was init by this Shell.
+ * @param metrics_pid The "metrics" app process id.
+ */
+void execute_stop_monitor(int *metrics_pid);
+
+/**
+ * @brief Executes the "status_monitor" command, that shows the "metrics" app, if it was init by this Shell.
+ * @param metrics_pid The "metrics" app process id.
+ */
+void execute_status_monitor(const int *metrics_pid);
+
+/**
  * @brief Potential external command execution.
  * @param sc_tokens Single command tokens.
  * @param background_execution Should be executed in the background?
  */
 void execute_external_cmd(char** sc_tokens, bool background_execution);
+
+/**
+ * @brief You don't call this function directly, this is a handler.
+ * @param sig Not used inside the function.
+ * @param info Metadata of the signal.
+ * @param context Not used inside the function.
+ */
+void handle_sigusr1(int sig, siginfo_t *info, void *context);
 
 /**
  * @brief Monkeypatch of perror and fprintf(stderr, ...). Needed due to "bad" management of some IDE/Shell terminals.

@@ -5,6 +5,10 @@
 
 #include "shell.h"
 
+// Global variables
+//! \brief Status from "metrics" handled. Gets set to true when the "metrics" app signals with its status data.
+static bool sfmh = false;
+
 void start_shell_ml()
 {
     // The shell itself mustn't answer to certain signals
@@ -35,6 +39,8 @@ void execute_command(char* input, char* cwd)
 {
     // Initialize job counter
     static unsigned long long int job_id = 0;
+    // There're custom commands that work with the "metrics" app (lab 1); keep track of some data
+    static int metrics_pid = -1;
     // Cleanse the newline added at the end, if exist
     cleanse_newline(input);
     // Let's dup this value to a helper, for strtok() usage; the original one'll be useful as pristine later
@@ -87,22 +93,43 @@ void execute_command(char* input, char* cwd)
         }
         else if (strcmp(sc_tokens[0], "quit") == 0)
         {
-            // Try to end zombies processes
+            // Try to end zombie processes
             while (waitpid(-1, NULL, WNOHANG) > 0) {}
             exit(EXIT_SUCCESS);
         }
+        else if (strcmp(sc_tokens[0], "stop_monitor") == 0)
+        {
+            execute_stop_monitor(&metrics_pid);
+        }
+        else if (strcmp(sc_tokens[0], "status_monitor") == 0)
+        {
+            execute_status_monitor(&metrics_pid);
+        }
         else
         {
-            // Potential external command invocation
+            // Potential external or monitor-related command invocation
             const pid_t pid_child = fork();
             if (pid_child == -1)
             {
-                _wstderr("ERROR: forking of current process failed", true);
+                _wstderr("ERROR: Forking of current process failed", true);
                 return;
             }
             else if (pid_child == 0)
             {
-                execute_external_cmd(sc_tokens, background_execution);
+                if (strcmp(sc_tokens[0], "start_monitor") == 0)
+                {
+                    char* argv[2] = {METRICS_APP_PATH, NULL};
+                    execute_external_cmd(argv, background_execution);
+                }
+                else
+                {
+                    execute_external_cmd(sc_tokens, background_execution);
+                }
+            }
+            // Save the child pid if "start_monitor" command was called
+            if (strcmp(sc_tokens[0], "start_monitor") == 0)
+            {
+                metrics_pid = pid_child;
             }
             // Parent process; wait for child to finish only if not a background proc
             if (background_execution)
@@ -114,7 +141,7 @@ void execute_command(char* input, char* cwd)
             }
             else
             {
-                // Non concurrent execution, wait for child processto finish
+                // Non concurrent execution, wait for child process to finish
                 if (waitpid(pid_child, NULL, 0) == -1)
                 {
                     _wstderr("ERROR: waitpid() failed", true);
@@ -157,7 +184,7 @@ void execute_command(char* input, char* cwd)
             const pid_t pid_child = fork();
             if (pid_child == -1)
             {
-                _wstderr("ERROR: forking of current process failed", true);
+                _wstderr("ERROR: Forking of current process failed", true);
                 return;
             }
             else if (pid_child == 0)
@@ -220,6 +247,10 @@ void execute_command(char* input, char* cwd)
                 else if (strcmp(sc_tokens[0], "quit") == 0)
                 {
                     // As a coupled command, does nothing
+                }
+                else if (strcmp(sc_tokens[0], "status_monitor") == 0)
+                {
+                    execute_status_monitor(&metrics_pid);
                 }
                 else
                 {
@@ -473,15 +504,88 @@ void execute_echo(char* input, char** sc_tokens, bool background_execution)
     }
 }
 
+void execute_stop_monitor(int *metrics_pid)
+{
+    if (*metrics_pid != -1)
+    {
+        if (kill(*metrics_pid, SIGTERM) == -1)
+        {
+            _wstderr("ERROR: \"metrics\" child process can't be killed", true);
+        }
+        else
+        {
+            puts("metrics successfully stopped.");
+        }
+        *metrics_pid = -1;
+    }
+}
+
+void execute_status_monitor(const int *metrics_pid)
+{
+    if (*metrics_pid != -1)
+    {
+        // Only if the monitor was started, get its status; subscribe to listening to a response
+        struct sigaction sa;
+        sa.sa_flags = SA_SIGINFO;
+        sa.sa_sigaction = handle_sigusr1;
+        sigemptyset(&sa.sa_mask);
+        sa.sa_restorer = NULL;
+        if (sigaction(SIGUSR1, &sa, NULL) == -1) {
+            _wstderr("ERROR: Signal subscription failed", true);
+        }
+        else
+        {
+            // Successfully subscribed to catch response from the child process; send signal
+            union sigval directive;
+            directive.sival_int = METRICS_GET_STATUS_CODE;
+            if (sigqueue(*metrics_pid, SIGUSR1, directive) == -1)
+            {
+                _wstderr("ERROR: Signaling \"status_monitor\"", true);
+            }
+            else
+            {
+                // Signal successfully sent, await response
+                time_t l_start_t, l_current_t;
+                time(&l_start_t);
+                while (true)
+                {
+                    time(&l_current_t);
+                    if (sfmh)
+                    {
+                        // Signal from metrics with its status successfully handled, reset it
+                        sfmh = false;
+                        break;
+                    }
+                    else if (difftime(l_current_t, l_start_t) >= WAIT_T_FOR_METRICS_RESPONSE)
+                    {
+                        _wstderr("ERROR: Timeout reached. No response from \"metrics\" app.\n", false);
+                        break;
+                    }
+                }
+            }
+            // Unsubscribe to SIGUSR1
+            sa.sa_flags = 0;
+            sa.sa_handler = SIG_DFL;
+            if (sigaction(SIGUSR1, &sa, NULL) == -1) {
+                _wstderr("ERROR: Signal unsubscription failed", true);
+            }
+        }
+    }
+    else
+    {
+        puts("WARNING: metrics app not initialized, or not tracked by this Shell.");
+    }
+}
+
 void execute_external_cmd(char** sc_tokens, bool background_execution)
 {
     // If this child proc is being executed in the foreground, certain signals must respond
     if (!background_execution)
     {
-        for (int j = LOWEST_ARR_INDEX; j < N_SINGALS_TO_HANDLE; j++)
+        for (int i = LOWEST_ARR_INDEX; i < N_SINGALS_TO_HANDLE; i++)
         {
             // Revert these signals managment to their default behavior
-            signal(signals[j], SIG_DFL);
+            signal(signals[i], SIG_DFL);
         }
     }
     // Execute this child, pass the torch of the proc to another program
@@ -491,6 +595,40 @@ void execute_external_cmd(char** sc_tokens, bool background_execution)
         _wstderr("ERROR: Command couldn't be executed", true);
         exit(EXIT_FAILURE);
     }
+}
+
+void handle_sigusr1(int sig, siginfo_t *info, void *context)
+{
+    // Args ignored
+    (void)context;
+    (void)sig;
+
+    // "monitor" app status encoded
+    int e_status = info->si_value.sival_int;
+    // Decode
+    unsigned char d_status[G_STATUS_N_METRICS_TRACKED] = {0};
+    /** Index meaning (LSB to MSB):
+     * 0 - cpu_usage_percentage
+     * 1 - memory_used_percentage
+     * 2 - sectors_read_rate
+     * 3 - sectors_written_rate
+     */
+    d_status[0] = (unsigned char)(e_status & 0xFF);
+    d_status[1] = (unsigned char)((e_status >> 8) & 0xFF);
+    d_status[2] = (unsigned char)((e_status >> 16) & 0xFF);
+    d_status[3] = (unsigned char)((e_status >> 24) & 0xFF);
+    // print data to stdout
+    printf(
+        "metrics app (working: OK) data\n"
+        "------------------------------\n"
+        "CPU usage: %u %%\n"
+        "RAM usage: %u %%\n"
+        "HDD Sectors (512 KB each) read/s: %u\n"
+        "HDD Sectors (512 KB each) written/s: %u\n", d_status[0], d_status[1], d_status[2], d_status[3]
+    );
+
+    // set the flag as "monitor" status was received
+    sfmh = true;
 }
 
 void _wstderr(const char* s, bool use_perror)

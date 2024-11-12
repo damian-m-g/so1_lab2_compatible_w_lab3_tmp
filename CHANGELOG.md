@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9-alpha] - 2024-10-12
+
+### Added
+
+- Activity 9 implemented: integration with "metrics" app.
+
+### Fixed
+
+- Small fixes.
+
 ## [0.8-alpha] - 2024-10-10
 
 ### Added
