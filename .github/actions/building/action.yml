@@ -12,27 +12,27 @@ runs:
         sudo apt install libmicrohttpd-dev
         
         PROJECT_ROOT=${pwd}
-        METRICS_DIR="$PROJECT_ROOT/submodules/metrics"
+        METRICS_DIR="$PROJECT_ROOT/submodule"
         
         cd "$METRICS_DIR/lib"
         make
         
         cd "$METRICS_DIR/lib/prom"
-        mkdir build
+        mkdir -p build
         cd "$METRICS_DIR/lib/prom/build"
         cmake ..
         make
         sudo make install
         
         cd "$METRICS_DIR/lib/promhttp"
-        mkdir build
+        mkdir -p build
         cd "$METRICS_DIR/lib/promhttp/build"
         cmake ..
         make
         sudo make install
         
         cd "$METRICS_DIR"
-        mkdir build
+        mkdir -p build
         cd "$METRICS_DIR/build"
         cmake ..
         make all
@@ -41,7 +41,7 @@ runs:
         pip install conan
         conan profile detect --force
         conan config home
-        mkdir build
+        mkdir -p build
         conan install . --build=missing
         cd "$PROJECT_ROOT/build"
         cmake ..
