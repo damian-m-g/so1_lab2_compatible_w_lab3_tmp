@@ -59,6 +59,7 @@ dkms.conf
 /venv/
 CMakeUserPresets.json
 /.idea/
+temp.txt
 
 # build dir not for now
 /build/

@@ -6,11 +6,43 @@ runs:
   steps:
     - name: Compile
       shell: bash
-      run: |
-
-        SRC_FOLDER=$(pwd)/src
-
-        echo "Running command: cmake -DRUN_COVERAGE=1 .. && make -j2"
-
-        mkdir -p build && cd build
-        cmake -DRUN_COVERAGE=1 -DENABLE_CJSON_TEST=OFF .. && make -j2
+      run: | 
+        sudo apt update
+        
+        sudo apt install libmicrohttpd-dev
+        
+        PROJECT_ROOT=${pwd}
+        METRICS_DIR="$PROJECT_ROOT/submodules/metrics"
+        
+        cd "$METRICS_DIR/lib"
+        make
+        
+        cd "$METRICS_DIR/lib/prom"
+        mkdir build
+        cd "$METRICS_DIR/lib/prom/build"
+        cmake ..
+        make
+        sudo make install
+        
+        cd "$METRICS_DIR/lib/promhttp"
+        mkdir build
+        cd "$METRICS_DIR/lib/promhttp/build"
+        cmake ..
+        make
+        sudo make install
+        
+        cd "$METRICS_DIR"
+        mkdir build
+        cd "$METRICS_DIR/build"
+        cmake ..
+        make all
+        
+        cd "$PROJECT_ROOT"
+        pip install conan
+        conan profile detect --force
+        conan config home
+        mkdir build
+        conan install . --build=missing
+        cd "$PROJECT_ROOT/build"
+        cmake ..
+        make
