@@ -18,7 +18,7 @@ void start_shell_ml()
     }
 
     // Get the 3 parts that conform the command line prompt
-    const char *user = getenv(ENV_USER_KEY);
+    const char* user = getenv(ENV_USER_KEY);
     char host[HOST_NAME_MAX + 1];
     gethostname(host, (HOST_NAME_MAX + 1));
     char cwd[PATH_MAX];
@@ -48,9 +48,9 @@ void execute_command(char* input, char* cwd)
     strcpy(input_h, input);
 
     // Tokenize single commands, per pipe
-    char *single_commands[MAX_SINGLE_COMMANDS];
+    char* single_commands[MAX_SINGLE_COMMANDS];
     int sc_n = LOWEST_ARR_INDEX; // will remain with this value if empty input was submitted; # of SC
-    char *token = strtok(input_h, SC_TOKEN_SEPARATOR);
+    char* token = strtok(input_h, SC_TOKEN_SEPARATOR);
     while (token != NULL && sc_n < MAX_SINGLE_COMMANDS)
     {
         single_commands[sc_n++] = token;
@@ -58,18 +58,19 @@ void execute_command(char* input, char* cwd)
     }
 
     // How many single commands (separated by |) were submitted: none, one or multiple?
-    if (sc_n == 0) return;
+    if (sc_n == 0)
+        return;
     // One single command was submitted
     if (sc_n == 1)
     {
         // One single command submitted; update job id
         job_id++;
         // Explicit freed of memory isn't done, relies on the OS when exit() gets called
-        char **sc_tokens = tokenize_single_command(single_commands[0]);
+        char** sc_tokens = tokenize_single_command(single_commands[0]);
         // Check if "&" appears, to see if it requires background execution
         bool background_execution = is_background_exec(sc_tokens);
         // Redirections implementation; check for "<" appearance
-        char *file_name = get_possible_redirection(sc_tokens, true);
+        char* file_name = get_possible_redirection(sc_tokens, true);
         int original_stdin = redirect_stdin(file_name);
         // Check for ">" appearance; re-use file_name, as it is a buffer
         file_name = get_possible_redirection(sc_tokens, false);
@@ -94,7 +95,9 @@ void execute_command(char* input, char* cwd)
         else if (strcmp(sc_tokens[0], "quit") == 0)
         {
             // Try to end zombie processes
-            while (waitpid(-1, NULL, WNOHANG) > 0) {}
+            while (waitpid(-1, NULL, WNOHANG) > 0)
+            {
+            }
             // In case the JSON config file for "metrics" was created, try its deletion
             delete_owned_metrics_json_config_file();
             // do exit
@@ -121,8 +124,8 @@ void execute_command(char* input, char* cwd)
             {
                 if (strcmp(sc_tokens[0], "start_monitor") == 0)
                 {
-                    char *metrics_json_config_file_path = get_metrics_json_config_file_path(sc_tokens);
-                    char *argv[2] = {METRICS_APP_PATH, metrics_json_config_file_path};
+                    char* metrics_json_config_file_path = get_metrics_json_config_file_path(sc_tokens);
+                    char* argv[2] = {METRICS_APP_PATH, metrics_json_config_file_path};
                     execute_external_cmd(argv, background_execution);
                 }
                 else
@@ -181,7 +184,7 @@ void execute_command(char* input, char* cwd)
             static char sc_h[ARG_MAX];
             strcpy(sc_h, single_commands[i]);
             // Explicit freed of memory isn't done, relies on the OS when exit() gets called
-            char **sc_tokens = tokenize_single_command(sc_h);
+            char** sc_tokens = tokenize_single_command(sc_h);
             // Check if "&" appears, to see if it requires background execution
             bool background_execution = is_background_exec(sc_tokens);
             // Fork main process
@@ -222,13 +225,13 @@ void execute_command(char* input, char* cwd)
                 if (i == 0)
                 {
                     // First single command, accepts "<"; check for its appearance
-                    const char *file_name = get_possible_redirection(sc_tokens, true);
+                    const char* file_name = get_possible_redirection(sc_tokens, true);
                     redirect_stdin(file_name);
                 }
                 else if (i == (sc_n - 1))
                 {
                     // Last single command, accepts ">"; check for its appearance
-                    const char *file_name = get_possible_redirection(sc_tokens, false);
+                    const char* file_name = get_possible_redirection(sc_tokens, false);
                     redirect_stdout(file_name);
                 }
                 // cleanse single command tokens & the string itself from redirection tokens
@@ -295,18 +298,18 @@ void execute_command(char* input, char* cwd)
 
 char** tokenize_single_command(char* sc)
 {
-    char **argv = malloc((MAX_TOKENS_PER_COMMAND + 1) * sizeof(char *));
+    char** argv = malloc((MAX_TOKENS_PER_COMMAND + 1) * sizeof(char*));
     if (argv == NULL)
     {
         _wstderr("ERROR: Failed to allocate memory", true);
         exit(EXIT_FAILURE);
     }
     int argc = LOWEST_ARR_INDEX;
-    char *token = strtok(sc, TOKEN_SEPARATOR);
+    char* token = strtok(sc, TOKEN_SEPARATOR);
     while (token != NULL && argc < MAX_TOKENS_PER_COMMAND)
     {
         argv[argc++] = malloc(strlen(token) + 1);
-        if(argv[argc - 1] == NULL)
+        if (argv[argc - 1] == NULL)
         {
             _wstderr("ERROR: Failed to allocate memory", true);
             exit(EXIT_FAILURE);
@@ -332,7 +335,7 @@ void execute_batch_file(const char* path)
     char cwd[PATH_MAX];
     getcwd(cwd, PATH_MAX);
     // Open file
-    FILE *file = fopen(path, "r");
+    FILE* file = fopen(path, "r");
     if (file == NULL)
     {
         _wstderr("ERROR: Opening batch file", true);
@@ -427,7 +430,7 @@ void execute_cd(char* input, char** sc_tokens, bool background_execution, char* 
         if (strcmp(sc_tokens[1], "-") == 0 && sc_tokens[2] == NULL)
         {
             // Return to old current directory (if exist)
-            const char *old_cwd = getenv(ENV_OLDPWD_KEY);
+            const char* old_cwd = getenv(ENV_OLDPWD_KEY);
             if (old_cwd == NULL)
             {
                 errno = ENOENT;
@@ -480,12 +483,12 @@ void execute_echo(char* input, char** sc_tokens, bool background_execution)
         cleanse_ampersand(input);
     }
     // Check existence of argument
-    if(sc_tokens[1])
+    if (sc_tokens[1])
     {
         // Arg provided; check if starts with '$', in which case it's referencing an env var
         if (sc_tokens[1][0] == '$')
         {
-            const char *env_val = getenv(&input[6]);
+            const char* env_val = getenv(&input[6]);
             if (env_val == NULL)
             {
                 // No env var with thy name or any other issue; errno doesn't get set
@@ -508,7 +511,7 @@ void execute_echo(char* input, char** sc_tokens, bool background_execution)
     }
 }
 
-void execute_stop_monitor(int *metrics_pid)
+void execute_stop_monitor(int* metrics_pid)
 {
     if (*metrics_pid != -1)
     {
@@ -524,7 +527,7 @@ void execute_stop_monitor(int *metrics_pid)
     }
 }
 
-void execute_status_monitor(const int *metrics_pid)
+void execute_status_monitor(const int* metrics_pid)
 {
     if (*metrics_pid != -1)
     {
@@ -534,7 +537,8 @@ void execute_status_monitor(const int *metrics_pid)
         sa.sa_sigaction = handle_sigusr1;
         sigemptyset(&sa.sa_mask);
         sa.sa_restorer = NULL;
-        if (sigaction(SIGUSR1, &sa, NULL) == -1) {
+        if (sigaction(SIGUSR1, &sa, NULL) == -1)
+        {
             _wstderr("ERROR: Signal subscription failed", true);
         }
         else
@@ -570,7 +574,8 @@ void execute_status_monitor(const int *metrics_pid)
             // Unsubscribe to SIGUSR1
             sa.sa_flags = 0;
             sa.sa_handler = SIG_DFL;
-            if (sigaction(SIGUSR1, &sa, NULL) == -1) {
+            if (sigaction(SIGUSR1, &sa, NULL) == -1)
+            {
                 _wstderr("ERROR: Signal unsubscription failed", true);
             }
         }
@@ -601,7 +606,7 @@ void execute_external_cmd(char** sc_tokens, bool background_execution)
     }
 }
 
-void handle_sigusr1(int sig, siginfo_t *info, void *context)
+void handle_sigusr1(int sig, siginfo_t* info, void* context)
 {
     // Args ignored
     (void)context;
@@ -622,14 +627,13 @@ void handle_sigusr1(int sig, siginfo_t *info, void *context)
     d_status[2] = (unsigned char)((e_status >> 16) & 0xFF);
     d_status[3] = (unsigned char)((e_status >> 24) & 0xFF);
     // print data to stdout
-    printf(
-        "metrics app (working: OK) data\n"
-        "------------------------------\n"
-        "CPU usage: %u %%\n"
-        "RAM usage: %u %%\n"
-        "HDD Sectors (512 KB each) read/s: %u\n"
-        "HDD Sectors (512 KB each) written/s: %u\n", d_status[0], d_status[1], d_status[2], d_status[3]
-    );
+    printf("metrics app (working: OK) data\n"
+           "------------------------------\n"
+           "CPU usage: %u %%\n"
+           "RAM usage: %u %%\n"
+           "HDD Sectors (512 KB each) read/s: %u\n"
+           "HDD Sectors (512 KB each) written/s: %u\n",
+           d_status[0], d_status[1], d_status[2], d_status[3]);
 
     // set the flag as "monitor" status was received
     sfmh = true;
@@ -639,7 +643,7 @@ void _wstderr(const char* s, bool use_perror)
 {
     if (use_perror)
     {
-        perror(s);   
+        perror(s);
     }
     else
     {
@@ -653,7 +657,7 @@ void _wstderr(const char* s, bool use_perror)
 void _free_recursively(void** arr, int limit)
 {
     // free memory prev allocated and get out
-    for (int i = LOWEST_ARR_INDEX; limit == -1 ? arr[i] != NULL : i < limit ; i++)
+    for (int i = LOWEST_ARR_INDEX; limit == -1 ? arr[i] != NULL : i < limit; i++)
     {
         free(arr[i]);
     }

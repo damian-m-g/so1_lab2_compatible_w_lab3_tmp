@@ -58,6 +58,7 @@ dkms.conf
 /.github.bak/
 /venv/
 CMakeUserPresets.json
+/.idea/
 
 # build dir not for now
 /build/

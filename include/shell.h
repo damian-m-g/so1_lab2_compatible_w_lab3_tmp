@@ -8,20 +8,21 @@
 
 #include "cmd_utils.h"
 #include "metrics_utils.h"
-#include <stdlib.h>
-#include <unistd.h>
-#include <linux/limits.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <string.h>
-#include <getopt.h>
 #include <errno.h>
-#include <wait.h>
-#include <signal.h>
 #include <fcntl.h>
+#include <getopt.h>
+#include <linux/limits.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <time.h>
+#include <unistd.h>
+#include <wait.h>
 
+//! \brief Computer (host) maximum chars as name.
+#define HOST_NAME_MAX 64
 //! \brief Environment variable key to retrieve the computer current user.
 #define ENV_USER_KEY "USER"
 //! \brief First layer separator of smybols/tokens/words on a shell command, that creates single commands.
@@ -49,9 +50,9 @@ static const int signals[N_SINGALS_TO_HANDLE] = {SIGINT, SIGTERM, SIGTSTP, SIGQU
 //! \brief Path to the metrics (lab #1) app.
 #define METRICS_APP_PATH "/opt/metrics"
 //! \brief A code, that the "metrics" app understands as "get status".
-# define METRICS_GET_STATUS_CODE 7
+#define METRICS_GET_STATUS_CODE 7
 //! \brief Seconds awaited to receive response from metrics app after a "get status" req, when executed in foreground.
-# define WAIT_T_FOR_METRICS_RESPONSE 3.0
+#define WAIT_T_FOR_METRICS_RESPONSE 3.0
 //! \brief Number of metrics returned by a "get status" by the metrics app.
 #define G_STATUS_N_METRICS_TRACKED 4
 
@@ -123,13 +124,13 @@ void execute_echo(char* input, char** sc_tokens, bool background_execution);
  * @brief Executes the "stop_monitor" command, which stops the "metrics" app, if it was init by this Shell.
  * @param metrics_pid The "metrics" app process id.
  */
-void execute_stop_monitor(int *metrics_pid);
+void execute_stop_monitor(int* metrics_pid);
 
 /**
  * @brief Executes the "status_monitor" command, that shows the "metrics" app, if it was init by this Shell.
  * @param metrics_pid The "metrics" app process id.
  */
-void execute_status_monitor(const int *metrics_pid);
+void execute_status_monitor(const int* metrics_pid);
 
 /**
  * @brief Potential external command execution.
@@ -144,7 +145,7 @@ void execute_external_cmd(char** sc_tokens, bool background_execution);
  * @param info Metadata of the signal.
  * @param context Not used inside the function.
  */
-void handle_sigusr1(int sig, siginfo_t *info, void *context);
+void handle_sigusr1(int sig, siginfo_t* info, void* context);
 
 /**
  * @brief Monkeypatch of perror and fprintf(stderr, ...). Needed due to "bad" management of some IDE/Shell terminals.

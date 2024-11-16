@@ -12,7 +12,7 @@ char* get_metrics_json_config_file_path(char** argv)
     for (int i = LOWEST_ARR_INDEX + 1; argv[i] != NULL; i++)
     {
         // Inquire for each possible parameter; if `--config` was passed, ignore all the others
-        const char *arg = argv[i];
+        const char* arg = argv[i];
         if ((strlen(arg) > 9) && (strncmp(arg, "--config=", 9) == 0))
         {
             // Return the path to the config file
@@ -24,7 +24,7 @@ char* get_metrics_json_config_file_path(char** argv)
             int seconds = atoi(arg + 18);
             if (seconds <= 0 || seconds > 255)
             {
-                char *error_s = "ERROR: `--update_interval` value must be a recognizable int between 1 and 255.";
+                char* error_s = "ERROR: `--update_interval` value must be a recognizable int between 1 and 255.";
                 fwrite(error_s, sizeof(char), strlen(error_s), stderr);
                 return NULL;
             }
@@ -43,7 +43,7 @@ char* get_metrics_json_config_file_path(char** argv)
             }
             else
             {
-                char *error_s = "ERROR: `--cpu` value must be either \"true\" or \"false\".";
+                char* error_s = "ERROR: `--cpu` value must be either \"true\" or \"false\".";
                 fwrite(error_s, sizeof(char), strlen(error_s), stderr);
                 return NULL;
             }
@@ -61,7 +61,7 @@ char* get_metrics_json_config_file_path(char** argv)
             }
             else
             {
-                char *error_s = "ERROR: `--mem` value must be either \"true\" or \"false\".";
+                char* error_s = "ERROR: `--mem` value must be either \"true\" or \"false\".";
                 fwrite(error_s, sizeof(char), strlen(error_s), stderr);
                 return NULL;
             }
@@ -79,7 +79,7 @@ char* get_metrics_json_config_file_path(char** argv)
             }
             else
             {
-                char *error_s = "ERROR: `--hdd` value must be either \"true\" or \"false\".";
+                char* error_s = "ERROR: `--hdd` value must be either \"true\" or \"false\".";
                 fwrite(error_s, sizeof(char), strlen(error_s), stderr);
                 return NULL;
             }
@@ -97,7 +97,7 @@ char* get_metrics_json_config_file_path(char** argv)
             }
             else
             {
-                char *error_s = "ERROR: `--net` value must be either \"true\" or \"false\".";
+                char* error_s = "ERROR: `--net` value must be either \"true\" or \"false\".";
                 fwrite(error_s, sizeof(char), strlen(error_s), stderr);
                 return NULL;
             }
@@ -115,7 +115,7 @@ char* get_metrics_json_config_file_path(char** argv)
             }
             else
             {
-                char *error_s = "ERROR: `--procs` value must be either \"true\" or \"false\".";
+                char* error_s = "ERROR: `--procs` value must be either \"true\" or \"false\".";
                 fwrite(error_s, sizeof(char), strlen(error_s), stderr);
                 return NULL;
             }
@@ -145,10 +145,11 @@ int create_metrics_json_config_file(const unsigned char* data)
     cJSON_AddBoolToObject(metrics, "net", data[4]);
     cJSON_AddBoolToObject(metrics, "procs", data[5]);
     // Transform it to a string
-    char *json_string = cJSON_Print(root);
+    char* json_string = cJSON_Print(root);
     // Write that to a file
-    FILE *file = fopen(DEFAULT_JSON_CONFIG_FILE_OUTPUT_PATH, "w");
-    if (file == NULL) {
+    FILE* file = fopen(DEFAULT_JSON_CONFIG_FILE_OUTPUT_PATH, "w");
+    if (file == NULL)
+    {
         perror("ERROR: Failed to open file for writing");
         cJSON_Delete(root);
         free(json_string);

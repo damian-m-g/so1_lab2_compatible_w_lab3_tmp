@@ -6,8 +6,8 @@
 #ifndef CMD_UTILS_H
 #define CMD_UTILS_H
 
-#include <string.h>
 #include <stdbool.h>
+#include <string.h>
 
 //! \brief Lowest array index.
 #define LOWEST_ARR_INDEX 0

@@ -10,8 +10,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <linux/limits.h>
-#include <limits.h>
 #include <string.h>
 
 //! \brief Lowest array index.
@@ -27,7 +25,10 @@
  * - 4: net (take or not metric).
  * - 5: procs (take or not metric).
  */
-#define JSON_ENTRIES_DEF_VAL {1, 1, 1, 1, 1, 1}
+#define JSON_ENTRIES_DEF_VAL                                                                                           \
+    {                                                                                                                  \
+        1, 1, 1, 1, 1, 1                                                                                               \
+    }
 //! \brief Default JSON configuration file output path
 #define DEFAULT_JSON_CONFIG_FILE_OUTPUT_PATH "/tmp/metrics_config.json"
 
