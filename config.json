@@ -1,0 +1,10 @@
+{
+  "update_interval": 1,
+  "metrics": {
+    "cpu": true,
+    "mem": true,
+    "hdd": true,
+    "net": true,
+    "procs": true
+  }
+}
