@@ -25,7 +25,7 @@ file(GLOB SOURCES "src/*.c")
 find_package(cJSON REQUIRED)
 find_package(unity REQUIRED)
 
-add_subdirectory(submodules/metrics)
+add_subdirectory(submodule)
 
 # add_executable => .exe/library
 # add_library => .a/.so/.dll STATIC SHARED
