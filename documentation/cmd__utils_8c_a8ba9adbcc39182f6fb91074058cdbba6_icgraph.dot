@@ -1,0 +1,14 @@
+digraph "cleanse_newline"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="RL";
+  Node1 [label="cleanse_newline",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="If the arg has a newline at its end, it gets wiped. Modifies the arg."];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="execute_command",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$shell_8h.html#af4d001c69e9117bdd4a376cdfc19ebaa",tooltip="Executes certain command, could be an internal one, external one, or unexistent."];
+  Node2 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="execute_batch_file",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$shell_8h.html#a12cd2bfd0ac9c31c478b2eb2c9ba5e07",tooltip="Tries to execute a certain (no comments, one line per command) batch file."];
+  Node2 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="start_shell_ml",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$shell_8h.html#aa0b33b10ee17128cdb061acf8707afd1",tooltip="Starts the custom shell main loop."];
+}

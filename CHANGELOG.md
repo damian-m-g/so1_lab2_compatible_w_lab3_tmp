@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12-alpha] - 2024-10-16
+
+### Added
+
+- Activity 12 implemented: unit testing coverage of 5% minimum.
+- Coverage report generated.
+- Documentation (Doxygen) generated.
+- "config.json" & "INSTALL.md" pre-generated.
+
+### Fixed
+
+- Minor grammatical errors.
+
 ## [0.10-alpha] - 2024-10-15
 
 ### Added

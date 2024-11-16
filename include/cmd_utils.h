@@ -1,6 +1,6 @@
 /**
  * @file cmd_utils.h
- * @brief Commands utilities declaration
+ * @brief Commands utilities declaration.
  */
 
 #ifndef CMD_UTILS_H

@@ -31,7 +31,6 @@ add_executable(${PROJECT_NAME} ${SOURCES} src/main.c)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE cjson::cjson unity::unity)
 
-# ATTENTION: Do not execute for now
 if(RUN_COVERAGE EQUAL 1)
   add_subdirectory(tests)
 endif()

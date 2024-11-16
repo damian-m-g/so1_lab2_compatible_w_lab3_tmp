@@ -1,6 +1,6 @@
 /**
  * @file metrics_utils.h
- * @brief "metrics" app utilities declaration
+ * @brief "metrics" app utilities declaration.
  */
 
 #ifndef METRICS_UTILS_H

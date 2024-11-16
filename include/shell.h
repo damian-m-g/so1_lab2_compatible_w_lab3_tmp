@@ -1,6 +1,6 @@
 /**
  * @file shell.h
- * @brief Custom shell related logic declaration
+ * @brief Custom shell related logic declaration.
  */
 
 #ifndef SHELL_H

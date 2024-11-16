@@ -1,6 +1,6 @@
 /**
  * @file shell.c
- * @brief Custom shell related logic definition
+ * @brief Custom shell related logic definition.
  */
 
 #include "shell.h"

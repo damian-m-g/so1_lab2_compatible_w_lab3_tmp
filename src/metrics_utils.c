@@ -1,6 +1,6 @@
 /**
  * @file metrics_utils.h
- * @brief "metrics" app utilities definition
+ * @brief "metrics" app utilities definition.
  */
 
 #include "metrics_utils.h"

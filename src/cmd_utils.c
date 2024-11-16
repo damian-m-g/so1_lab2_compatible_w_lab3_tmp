@@ -1,6 +1,6 @@
 /**
  * @file cmd_utils.c
- * @brief Commands utilities definition
+ * @brief Commands utilities definition.
  */
 
 #include "cmd_utils.h"
