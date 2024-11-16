@@ -95,6 +95,9 @@ void execute_command(char* input, char* cwd)
         {
             // Try to end zombie processes
             while (waitpid(-1, NULL, WNOHANG) > 0) {}
+            // In case the JSON config file for "metrics" was created, try its deletion
+            delete_owned_metrics_json_config_file();
+            // do exit
             exit(EXIT_SUCCESS);
         }
         else if (strcmp(sc_tokens[0], "stop_monitor") == 0)
@@ -118,7 +121,8 @@ void execute_command(char* input, char* cwd)
             {
                 if (strcmp(sc_tokens[0], "start_monitor") == 0)
                 {
-                    char* argv[2] = {METRICS_APP_PATH, NULL};
+                    char *metrics_json_config_file_path = get_metrics_json_config_file_path(sc_tokens);
+                    char *argv[2] = {METRICS_APP_PATH, metrics_json_config_file_path};
                     execute_external_cmd(argv, background_execution);
                 }
                 else

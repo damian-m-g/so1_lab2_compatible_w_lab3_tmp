@@ -7,6 +7,7 @@
 #define SHELL_H
 
 #include "cmd_utils.h"
+#include "metrics_utils.h"
 #include <stdlib.h>
 #include <unistd.h>
 #include <linux/limits.h>

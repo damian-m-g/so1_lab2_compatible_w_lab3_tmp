@@ -6,11 +6,11 @@
 #ifndef CMD_UTILS_H
 #define CMD_UTILS_H
 
-//! \brief Lowest array index.
-#define LOWEST_ARR_INDEX 0
-
 #include <string.h>
 #include <stdbool.h>
+
+//! \brief Lowest array index.
+#define LOWEST_ARR_INDEX 0
 
 /**
  * @brief Checks for "&" existence at the end of the command, "removing" it from the tokens array.

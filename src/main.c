@@ -6,10 +6,6 @@
 // STD headers
 #include <stdlib.h>
 
-// lib or deps headers
-// TODO: For later usage.
-// #include <cjson/cJSON.h>
-
 // source headers
 #include "shell.h"
 

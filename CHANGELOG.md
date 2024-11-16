@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10-alpha] - 2024-10-15
+
+### Added
+
+- Activity 10 implemented: usage of cJSON for "metrics" configuration.
+
 ## [0.9-alpha] - 2024-10-12
 
 ### Added
