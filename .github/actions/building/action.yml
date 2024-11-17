@@ -41,10 +41,9 @@ runs:
         
         cd "$PROJECT_ROOT"
         pip install conan
-        conan profile detect --force
-        conan config home
+        conan profile detect
         mkdir -p build
         conan install . --build=missing
         cd "$PROJECT_ROOT/build"
-        cmake ..
+        cmake .. -DCMAKE_BUILD_TYPE=Release
         make
