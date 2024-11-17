@@ -11,9 +11,10 @@ runs:
         
         sudo apt install libmicrohttpd-dev
         
-        PROJECT_ROOT=${pwd}
-        METRICS_DIR="$PROJECT_ROOT/submodule"
         git submodule update --init --recursive
+        
+        PROJECT_ROOT=$(pwd)
+        METRICS_DIR="$PROJECT_ROOT/submodule"
         
         cd "$METRICS_DIR/lib"
         make
