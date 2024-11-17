@@ -22,7 +22,11 @@ void start_shell_ml()
     char host[HOST_NAME_MAX + 1];
     gethostname(host, (HOST_NAME_MAX + 1));
     char cwd[PATH_MAX];
-    getcwd(cwd, PATH_MAX);
+    if (getcwd(cwd, PATH_MAX) == NULL)
+    {
+        _wstderr("ERROR: cwd can't be retrieved", true);
+        exit(EXIT_FAILURE);
+    }
 
     // Main loop
     while (true)
@@ -30,8 +34,10 @@ void start_shell_ml()
         printf("%s@%s:%s$ ", user, host, cwd);
         // Buffer for the input
         static char input[ARG_MAX];
-        fgets(input, ARG_MAX, stdin);
-        execute_command(input, cwd);
+        if (fgets(input, ARG_MAX, stdin) != NULL)
+        {
+            execute_command(input, cwd);
+        }
     }
 }
 
@@ -333,7 +339,11 @@ void execute_batch_file(const char* path)
 {
     // Get current working directory
     char cwd[PATH_MAX];
-    getcwd(cwd, PATH_MAX);
+    if (getcwd(cwd, PATH_MAX) == NULL)
+    {
+        _wstderr("ERROR: cwd can't be retrieved", true);
+        exit(EXIT_FAILURE);
+    }
     // Open file
     FILE* file = fopen(path, "r");
     if (file == NULL)
@@ -447,7 +457,11 @@ void execute_cd(char* input, char** sc_tokens, bool background_execution, char* 
                 {
                     // Success
                     setenv(ENV_OLDPWD_KEY, cwd, 1);
-                    getcwd(cwd, PATH_MAX);
+                    if (getcwd(cwd, PATH_MAX) == NULL)
+                    {
+                        _wstderr("ERROR: cwd can't be retrieved", true);
+                        exit(EXIT_FAILURE);
+                    }
                 }
             }
         }
@@ -463,7 +477,11 @@ void execute_cd(char* input, char** sc_tokens, bool background_execution, char* 
             {
                 // The arguments is right, proceed with the normal procedure
                 setenv(ENV_OLDPWD_KEY, cwd, 1);
-                getcwd(cwd, PATH_MAX);
+                if (getcwd(cwd, PATH_MAX) == NULL)
+                {
+                    _wstderr("ERROR: cwd can't be retrieved", true);
+                    exit(EXIT_FAILURE);
+                }
             }
         }
     }
