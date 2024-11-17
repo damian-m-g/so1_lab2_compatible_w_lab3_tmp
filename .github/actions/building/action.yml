@@ -7,8 +7,6 @@ runs:
     - name: Compile
       shell: bash
       run: | 
-        sudo apt update
-        
         sudo apt install libmicrohttpd-dev
         
         git submodule update --init --recursive
@@ -41,9 +39,10 @@ runs:
         
         cd "$PROJECT_ROOT"
         pip install conan
-        conan profile detect
+        conan profile detect --force
+        conan config home
         mkdir -p build
         conan install . --build=missing
         cd "$PROJECT_ROOT/build"
-        cmake .. -DCMAKE_BUILD_TYPE=Release
+        cmake .. -DCMAKE_TOOLCHAIN_FILE=./Release/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release
         make
