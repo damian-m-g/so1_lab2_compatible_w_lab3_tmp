@@ -51,15 +51,21 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
+# CLion metadata
+/.idea/
+
 # CLion build directory
 /cmake-build-debug/
 
-# others
-/.github.bak/
+# build dir & virtual environment
 /venv/
-CMakeUserPresets.json
-/.idea/
-temp.txt
-
-# build dir not for now
 /build/
+
+# temps
+CMakeUserPresets.json
+
+# Doxygen doc
+/documentation/
+
+# Coverage lcov report
+/coverage_report/

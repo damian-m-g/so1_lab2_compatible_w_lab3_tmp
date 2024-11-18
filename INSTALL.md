@@ -21,6 +21,23 @@
 
 These steps should have generated the executable file inside the `build` folder. You can execute it from your shell as any other program, without any argument, or with a path to a Batch file (a certain implementation of it, more on this later).
 
+## How to run the tests and coverage report?
+
+- Make sure to perform the steps to compile, mentioned on the section "How to compile it?".
+- With current working directory in `./build` (relative to the project root dir), execute:
+- `cmake .. -DCMAKE_TOOLCHAIN_FILE=./Debug/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Debug -DRUN_COVERAGE=1`
+- `make`
+- `ctest`
+- You can see the results on-screen. A dir named `coverage_report` will be generated on the root dir of the project. Inside, seek for the `index.html` file, and open it with your prefered web explorer to see the lcov run result.
+
+## How to generate the project documentation?
+
+- Make sure to perform the steps to compile, mentioned on the section "How to compile it?".
+- Install Doxygen if you don't have it installed on your system; i.e.: in Debian related systems: `sudo apt install doxygen`
+- Make sure the current working directory of your shell is the project root dir, and execute:
+- `doxygen Doxyfile`
+- A dir named `documentation` will be generated on the root dir of the project. Inside, seek for the `index.html` file, and open it with your prefered web explorer to see the API documentation for the project.
+
 ## How to use it without initial argument (classic run)?
 
 ### Internal Commands
