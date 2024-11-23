@@ -46,7 +46,7 @@ void execute_command(char* input, char* cwd)
     // Initialize job counter
     static unsigned long long int job_id = 0;
     // There're custom commands that work with the "metrics" app (lab 1); keep track of some data
-    static int metrics_pid = -1;
+    static int metrics_pid = PID_UNASSIGNED;
     // Cleanse the newline added at the end, if exist
     cleanse_newline(input);
     // Let's dup this value to a helper, for strtok() usage; the original one'll be useful as pristine later
@@ -55,7 +55,8 @@ void execute_command(char* input, char* cwd)
 
     // Tokenize single commands, per pipe
     char* single_commands[MAX_SINGLE_COMMANDS];
-    int sc_n = LOWEST_ARR_INDEX; // will remain with this value if empty input was submitted; # of SC
+    // Will remain with this value if empty input was submitted; # of SC
+    int sc_n = LOWEST_ARR_INDEX;
     char* token = strtok(input_h, SC_TOKEN_SEPARATOR);
     while (token != NULL && sc_n < MAX_SINGLE_COMMANDS)
     {
@@ -72,7 +73,7 @@ void execute_command(char* input, char* cwd)
         // One single command submitted; update job id
         job_id++;
         // Explicit freed of memory isn't done, relies on the OS when exit() gets called
-        char** sc_tokens = tokenize_single_command(single_commands[0]);
+        char** sc_tokens = tokenize_single_command(single_commands[LOWEST_ARR_INDEX]);
         // Check if "&" appears, to see if it requires background execution
         bool background_execution = is_background_exec(sc_tokens);
         // Redirections implementation; check for "<" appearance
@@ -85,20 +86,20 @@ void execute_command(char* input, char* cwd)
         cleanse_redirections_on_argv(sc_tokens);
         cleanse_redirections_on_sc(input);
         // Internal commands, when called solo, are always executed in the foreground, as they are quick
-        if (strcmp(sc_tokens[0], "cd") == 0)
+        if (strcmp(sc_tokens[LOWEST_ARR_INDEX], "cd") == 0)
         {
             execute_cd(input, sc_tokens, background_execution, cwd);
         }
-        else if (strcmp(sc_tokens[0], "clr") == 0)
+        else if (strcmp(sc_tokens[LOWEST_ARR_INDEX], "clr") == 0)
         {
             printf(CLR_ANSI_EC);
             fflush(stdout);
         }
-        else if (strcmp(sc_tokens[0], "echo") == 0)
+        else if (strcmp(sc_tokens[LOWEST_ARR_INDEX], "echo") == 0)
         {
             execute_echo(input, sc_tokens, background_execution);
         }
-        else if (strcmp(sc_tokens[0], "quit") == 0)
+        else if (strcmp(sc_tokens[LOWEST_ARR_INDEX], "quit") == 0)
         {
             // Try to end zombie processes
             while (waitpid(-1, NULL, WNOHANG) > 0)
@@ -109,11 +110,11 @@ void execute_command(char* input, char* cwd)
             // do exit
             exit(EXIT_SUCCESS);
         }
-        else if (strcmp(sc_tokens[0], "stop_monitor") == 0)
+        else if (strcmp(sc_tokens[LOWEST_ARR_INDEX], "stop_monitor") == 0)
         {
             execute_stop_monitor(&metrics_pid);
         }
-        else if (strcmp(sc_tokens[0], "status_monitor") == 0)
+        else if (strcmp(sc_tokens[LOWEST_ARR_INDEX], "status_monitor") == 0)
         {
             execute_status_monitor(&metrics_pid);
         }
@@ -128,10 +129,10 @@ void execute_command(char* input, char* cwd)
             }
             else if (pid_child == 0)
             {
-                if (strcmp(sc_tokens[0], "start_monitor") == 0)
+                if (strcmp(sc_tokens[LOWEST_ARR_INDEX], "start_monitor") == 0)
                 {
                     char* metrics_json_config_file_path = get_metrics_json_config_file_path(sc_tokens);
-                    char* argv[2] = {METRICS_APP_PATH, metrics_json_config_file_path};
+                    char* argv[METRICS_MAX_ARGC] = {METRICS_APP_PATH, metrics_json_config_file_path};
                     execute_external_cmd(argv, background_execution);
                 }
                 else
@@ -140,7 +141,7 @@ void execute_command(char* input, char* cwd)
                 }
             }
             // Save the child pid if "start_monitor" command was called
-            if (strcmp(sc_tokens[0], "start_monitor") == 0)
+            if (strcmp(sc_tokens[LOWEST_ARR_INDEX], "start_monitor") == 0)
             {
                 metrics_pid = pid_child;
             }
@@ -167,7 +168,7 @@ void execute_command(char* input, char* cwd)
     }
     else
     {
-        // Multiple single command submitted, pipe implementation called
+        // Multiple single command (sc_n > 1) submitted, pipe implementation called
         int pipesfd[2 * (sc_n - 1)];
         // Pipes creation
         for (int i = LOWEST_ARR_INDEX; i < sc_n; i++)
@@ -244,24 +245,24 @@ void execute_command(char* input, char* cwd)
                 cleanse_redirections_on_argv(sc_tokens);
                 cleanse_redirections_on_sc(single_commands[i]);
                 // Watch out if the command called is internal or external
-                if (strcmp(sc_tokens[0], "cd") == 0)
+                if (strcmp(sc_tokens[LOWEST_ARR_INDEX], "cd") == 0)
                 {
                     execute_cd(single_commands[i], sc_tokens, background_execution, cwd);
                 }
-                else if (strcmp(sc_tokens[0], "clr") == 0)
+                else if (strcmp(sc_tokens[LOWEST_ARR_INDEX], "clr") == 0)
                 {
                     printf(CLR_ANSI_EC);
                     fflush(stdout);
                 }
-                else if (strcmp(sc_tokens[0], "echo") == 0)
+                else if (strcmp(sc_tokens[LOWEST_ARR_INDEX], "echo") == 0)
                 {
                     execute_echo(single_commands[i], sc_tokens, background_execution);
                 }
-                else if (strcmp(sc_tokens[0], "quit") == 0)
+                else if (strcmp(sc_tokens[LOWEST_ARR_INDEX], "quit") == 0)
                 {
                     // As a coupled command, does nothing
                 }
-                else if (strcmp(sc_tokens[0], "status_monitor") == 0)
+                else if (strcmp(sc_tokens[LOWEST_ARR_INDEX], "status_monitor") == 0)
                 {
                     execute_status_monitor(&metrics_pid);
                 }
@@ -434,10 +435,10 @@ void execute_cd(char* input, char** sc_tokens, bool background_execution, char* 
         cleanse_ampersand(input);
     }
     // Check existence of argument
-    if (sc_tokens[1])
+    if (sc_tokens[SC_FIRST_ARG_I])
     {
         // Argument provided
-        if (strcmp(sc_tokens[1], "-") == 0 && sc_tokens[2] == NULL)
+        if (strcmp(sc_tokens[SC_FIRST_ARG_I], "-") == 0 && sc_tokens[SC_SECOND_ARG_I] == NULL)
         {
             // Return to old current directory (if exist)
             const char* old_cwd = getenv(ENV_OLDPWD_KEY);
@@ -456,7 +457,7 @@ void execute_cd(char* input, char** sc_tokens, bool background_execution, char* 
                 else
                 {
                     // Success
-                    setenv(ENV_OLDPWD_KEY, cwd, 1);
+                    setenv(ENV_OLDPWD_KEY, cwd, true);
                     if (getcwd(cwd, PATH_MAX) == NULL)
                     {
                         _wstderr("ERROR: cwd can't be retrieved", true);
@@ -468,7 +469,7 @@ void execute_cd(char* input, char** sc_tokens, bool background_execution, char* 
         else
         {
             // Try to move to a new current directory
-            if (chdir(&input[3]) == -1)
+            if (chdir(&input[CD_ARG_START_I]) == -1)
             {
                 // The argument is wrong or another problem appeared
                 _wstderr("ERROR: Can't change current working directory", true);
@@ -476,7 +477,7 @@ void execute_cd(char* input, char** sc_tokens, bool background_execution, char* 
             else
             {
                 // The arguments is right, proceed with the normal procedure
-                setenv(ENV_OLDPWD_KEY, cwd, 1);
+                setenv(ENV_OLDPWD_KEY, cwd, true);
                 if (getcwd(cwd, PATH_MAX) == NULL)
                 {
                     _wstderr("ERROR: cwd can't be retrieved", true);
@@ -501,10 +502,10 @@ void execute_echo(char* input, char** sc_tokens, bool background_execution)
         cleanse_ampersand(input);
     }
     // Check existence of argument
-    if (sc_tokens[1])
+    if (sc_tokens[SC_FIRST_ARG_I])
     {
         // Arg provided; check if starts with '$', in which case it's referencing an env var
-        if (sc_tokens[1][0] == '$')
+        if (sc_tokens[SC_FIRST_ARG_I][LOWEST_ARR_INDEX] == '$')
         {
             const char* env_val = getenv(&input[6]);
             if (env_val == NULL)
@@ -519,7 +520,7 @@ void execute_echo(char* input, char** sc_tokens, bool background_execution)
         }
         else
         {
-            puts(&input[5]);
+            puts(&input[ECHO_ARG_START_I]);
         }
     }
     else
@@ -616,7 +617,7 @@ void execute_external_cmd(char** sc_tokens, bool background_execution)
         }
     }
     // Execute this child, pass the torch of the proc to another program
-    if (execvp(sc_tokens[0], sc_tokens) == -1)
+    if (execvp(sc_tokens[SC_FIRST_ARG_I], sc_tokens) == -1)
     {
         // Something went wrong
         _wstderr("ERROR: Command couldn't be executed", true);
@@ -640,10 +641,10 @@ void handle_sigusr1(int sig, siginfo_t* info, void* context)
      * 2 - sectors_read_rate
      * 3 - sectors_written_rate
      */
-    d_status[0] = (unsigned char)(e_status & 0xFF);
-    d_status[1] = (unsigned char)((e_status >> 8) & 0xFF);
-    d_status[2] = (unsigned char)((e_status >> 16) & 0xFF);
-    d_status[3] = (unsigned char)((e_status >> 24) & 0xFF);
+    d_status[D_STATUS_CPU_I] = (unsigned char)((e_status >> LSBIT_CPU_EMSD) & LSBYTE_MASK);
+    d_status[D_STATUS_RAM_I] = (unsigned char)((e_status >> LSBIT_RAM_EMSD) & LSBYTE_MASK);
+    d_status[D_STATUS_HDDR_I] = (unsigned char)((e_status >> LSBIT_HDDR_EMSD) & LSBYTE_MASK);
+    d_status[D_STATUS_HDDW_I] = (unsigned char)((e_status >> LSBIT_HDDW_EMSD) & LSBYTE_MASK);
     // print data to stdout
     printf("metrics app (working: OK) data\n"
            "------------------------------\n"
@@ -651,7 +652,7 @@ void handle_sigusr1(int sig, siginfo_t* info, void* context)
            "RAM usage: %u %%\n"
            "HDD Sectors (512 KB each) read/s: %u\n"
            "HDD Sectors (512 KB each) written/s: %u\n",
-           d_status[0], d_status[1], d_status[2], d_status[3]);
+           d_status[D_STATUS_CPU_I], d_status[D_STATUS_RAM_I], d_status[D_STATUS_HDDR_I], d_status[D_STATUS_HDDW_I]);
 
     // set the flag as "monitor" status was received
     sfmh = true;

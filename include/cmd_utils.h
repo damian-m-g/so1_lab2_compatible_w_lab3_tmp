@@ -11,6 +11,10 @@
 
 //! \brief Lowest array index.
 #define LOWEST_ARR_INDEX 0
+//! \brief Minimum char index at which '&' shell operator is permitted to appear.
+#define AMP_MIN_INDEX_APPEARANCE 2
+//! \brief Any string null terminator. Stablish the end of a string.
+#define STR_NULL_TERMINATOR '\0'
 
 /**
  * @brief Checks for "&" existence at the end of the command, "removing" it from the tokens array.

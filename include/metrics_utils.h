@@ -29,8 +29,35 @@
     {                                                                                                                  \
         1, 1, 1, 1, 1, 1                                                                                               \
     }
-//! \brief Default JSON configuration file output path
+//! \brief Default JSON configuration file output path.
 #define DEFAULT_JSON_CONFIG_FILE_OUTPUT_PATH "/tmp/metrics_config.json"
+//! \brief "update_interval" option minimum value.
+#define UPDATE_I_MINV 0
+//! \brief "update_interval" option maximum value.
+#define UPDATE_I_MAXV 255
+
+//! \brief JSON config file indexes for key-value pairs.
+enum json_index
+{
+    UPDATE_I_I,
+    CPU_I,
+    MEM_I,
+    HDD_I,
+    NET_I,
+    PROCS_I
+};
+
+//! \brief Different options prefix (leaving aside the value itself) length.
+enum option_pl
+{
+    CONFIG_OPL = 9,
+    UPDATE_I_OPL = 18,
+    CPU_OPL = 6,
+    MEM_OPL = 6,
+    HDD_OPL = 6,
+    NET_OPL = 6,
+    PROCS_OPL = 8
+};
 
 /**
  * @brief According to argv passed by the user of the shell, parses them and get the path to the "metrics" config file.

@@ -29,14 +29,14 @@ void cleanse_newline(char* input)
     const size_t input_len = strlen(input);
     if (input[input_len - 1] == '\n')
     {
-        input[input_len - 1] = '\0';
+        input[input_len - 1] = STR_NULL_TERMINATOR;
     }
 }
 
 void cleanse_ampersand(char* input)
 {
     const size_t input_len = strlen(input);
-    input[input_len - 2] = '\0';
+    input[input_len - 2] = STR_NULL_TERMINATOR;
 }
 
 char* get_possible_redirection(char** argv, bool _stdin)
@@ -68,8 +68,8 @@ void cleanse_redirections_on_sc(char* sc)
 {
     const size_t sc_len = strlen(sc);
     int first_char_redirecting = -1;
-    // No cmd can have redirection at the leftmost as i.e.: "a < ...", hence if not found at index 2, doesn't exist
-    for (int i = sc_len - 1; i >= 2; i--)
+    // No cmd is permitted redirection at the leftmost, on a char index less than AMP_MIN_INDEX_APPEARANCE
+    for (int i = sc_len - 1; i >= AMP_MIN_INDEX_APPEARANCE; i--)
     {
         if (sc[i] == '<' || sc[i] == '>')
         {
@@ -81,16 +81,16 @@ void cleanse_redirections_on_sc(char* sc)
         // cleanse prefix space if exist
         if (sc[first_char_redirecting - 1] == ' ')
         {
-            sc[first_char_redirecting - 1] = '\0';
+            sc[first_char_redirecting - 1] = STR_NULL_TERMINATOR;
         }
         else
         {
-            sc[first_char_redirecting] = '\0';
+            sc[first_char_redirecting] = STR_NULL_TERMINATOR;
         }
     }
     else if (sc[sc_len - 1] == ' ')
     {
         // cleanse trailing space
-        sc[sc_len - 1] = '\0';
+        sc[sc_len - 1] = STR_NULL_TERMINATOR;
     }
 }

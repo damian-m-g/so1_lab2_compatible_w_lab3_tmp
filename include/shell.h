@@ -55,6 +55,41 @@ static const int signals[N_SINGALS_TO_HANDLE] = {SIGINT, SIGTERM, SIGTSTP, SIGQU
 #define WAIT_T_FOR_METRICS_RESPONSE 3.0
 //! \brief Number of metrics returned by a "get status" by the metrics app.
 #define G_STATUS_N_METRICS_TRACKED 4
+//! \brief For a process non-existent or undetected, by set its pid as "unassigned".
+#define PID_UNASSIGNED -1
+//! \brief "metrics" app maximum argc value.
+#define METRICS_MAX_ARGC 2
+//! \brief Change Directory ("cd") command index at which its argument start.
+#define CD_ARG_START_I 3
+//! \brief Echo ("echo") command index at which its argument start.
+#define ECHO_ARG_START_I 5
+//! \brief Binary mask, so to make useful only the LS Byte.
+#define LSBYTE_MASK 0xFF
+
+//! \brief Single command arguments index.
+enum sc_args_i
+{
+    SC_FIRST_ARG_I = 1,
+    SC_SECOND_ARG_I,
+};
+
+//! \brief Decoded status of "metrics" app indexes, each one linking to a specific status data.
+enum d_status_i
+{
+    D_STATUS_CPU_I,
+    D_STATUS_RAM_I,
+    D_STATUS_HDDR_I,
+    D_STATUS_HDDW_I
+};
+
+//! \brief Starting LS bit of encoded "monitor" status data.
+enum ls_bit_encoded_msd
+{
+    LSBIT_CPU_EMSD = 0,
+    LSBIT_RAM_EMSD = 8,
+    LSBIT_HDDR_EMSD = 16,
+    LSBIT_HDDW_EMSD = 24
+};
 
 /**
  * @brief Starts the custom shell main loop.

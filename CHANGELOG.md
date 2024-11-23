@@ -7,26 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.0.3] - 2024-10-18
+## [1.0.4] - 2024-11-23
+
+### Fixed
+
+- Magic numbers on all *.c and *.h files.
+- The dates on this file, which were wrong (pointed to month 10, when it should be 11).
+- "build" GitHub action of the QA workflow, so it builds the executable in Debug mode, and not in Release mode.
+
+## [1.0.3] - 2024-11-18
 
 ### Fixed
 
 - `documentation` and `coverage_report` folders are now ignored from the repository.
 - INSTALL.md file was modified to include documentation on how to run the tests, generating the coverage report; and how to generate the Doxygen API documentation for the project.
 
-## [1.0.2] - 2024-10-16
+## [1.0.2] - 2024-11-16
 
 ### Fixed
 
 - Potential flaws noticed by the warning flags.
 
-## [1.0.1] - 2024-10-16
+## [1.0.1] - 2024-11-16
 
 ### Changed
 
 - Testing submodule recognition on remote repository WF.
 
-## [1.0] - 2024-10-16
+## [1.0] - 2024-11-16
 
 ### Added
 
@@ -36,19 +44,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Remote action WF to complete OK.
 
-## [1.0-rc] - 2024-10-16
+## [1.0-rc] - 2024-11-16
 
 ### Fixed
 
 - Syntax (clang-format complying) fixes.
 
-## [1.0-beta] - 2024-10-16
+## [1.0-beta] - 2024-11-16
 
 ### Added
 
 - "config.json" & "INSTALL.md" completed.
 
-## [0.12-alpha] - 2024-10-16
+## [0.12-alpha] - 2024-11-16
 
 ### Added
 
@@ -61,13 +69,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Minor grammatical errors.
 
-## [0.10-alpha] - 2024-10-15
+## [0.10-alpha] - 2024-11-15
 
 ### Added
 
 - Activity 10 implemented: usage of cJSON for "metrics" configuration.
 
-## [0.9-alpha] - 2024-10-12
+## [0.9-alpha] - 2024-11-12
 
 ### Added
 
@@ -77,7 +85,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Small fixes.
 
-## [0.8-alpha] - 2024-10-10
+## [0.8-alpha] - 2024-11-10
 
 ### Added
 
@@ -92,13 +100,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Small fixes.
 
-## [0.6-alpha] - 2024-10-08
+## [0.6-alpha] - 2024-11-08
 
 ### Added
 
 - Activity 6 implemented: signals managment.
 
-## [0.5-alpha] - 2024-10-08
+## [0.5-alpha] - 2024-11-08
 
 ### Added
 
@@ -110,7 +118,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Small issues when passing length of certain arrays.
 
-## [0.4-alpha] - 2024-10-07
+## [0.4-alpha] - 2024-11-07
 
 ### Added
 
@@ -125,19 +133,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Used macros instead of hardcoded numbers for exit status on chid process going wrong.
 - Redundant code removed.
 
-## [0.3-alpha] - 2024-10-07
+## [0.3-alpha] - 2024-11-07
 
 ### Added
 
 - Activity 3 implemented: Invocation of external programs.
 
-## [0.2-alpha] - 2024-10-06
+## [0.2-alpha] - 2024-11-06
 
 ### Added
 
 - Activity 2 implemented: Internal commands. Remaining commands 'quit' and 'echo' were finished.
 
-## [0.1-alpha.3] - 2024-10-06
+## [0.1-alpha.3] - 2024-11-06
 
 ### Added
 
@@ -148,13 +156,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reference to certain macro wasn't linked.
 - Macro not used were cleaned.
 
-## [0.1-alpha.2] - 2024-10-06
+## [0.1-alpha.2] - 2024-11-06
 
 ### Added
 
 - Activity 2 partially implemented: Internal commands: cd.
 
-## [0.1-alpha] - 2024-10-05
+## [0.1-alpha] - 2024-11-05
 
 ### Added
 

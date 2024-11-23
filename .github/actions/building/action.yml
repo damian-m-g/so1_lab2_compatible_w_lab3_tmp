@@ -41,8 +41,9 @@ runs:
         pip install conan
         conan profile detect --force
         conan config home
+        cp ~/.conan2/profiles/default ~/.conan2/profiles/debug && sed -i -e 's/Release/Debug/g' ~/.conan2/profiles/debug
         mkdir -p build
-        conan install . --build=missing
+        conan install . --build=missing --profile=debug
         cd "$PROJECT_ROOT/build"
-        cmake .. -DCMAKE_TOOLCHAIN_FILE=./Release/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -DRUN_COVERAGE=1
+        cmake .. -DCMAKE_TOOLCHAIN_FILE=./Debug/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Debug -DRUN_COVERAGE=1
         make
