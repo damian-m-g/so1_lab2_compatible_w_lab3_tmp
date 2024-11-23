@@ -24,7 +24,7 @@ void start_shell_ml()
     char cwd[PATH_MAX];
     if (getcwd(cwd, PATH_MAX) == NULL)
     {
-        _wstderr("ERROR: cwd can't be retrieved", true);
+        wstderr("ERROR: cwd can't be retrieved", true);
         exit(EXIT_FAILURE);
     }
 
@@ -124,7 +124,7 @@ void execute_command(char* input, char* cwd)
             const pid_t pid_child = fork();
             if (pid_child == -1)
             {
-                _wstderr("ERROR: Forking of current process failed", true);
+                wstderr("ERROR: Forking of current process failed", true);
                 return;
             }
             else if (pid_child == 0)
@@ -158,7 +158,7 @@ void execute_command(char* input, char* cwd)
                 // Non concurrent execution, wait for child process to finish
                 if (waitpid(pid_child, NULL, 0) == -1)
                 {
-                    _wstderr("ERROR: waitpid() failed", true);
+                    wstderr("ERROR: waitpid() failed", true);
                 }
             }
         }
@@ -175,7 +175,7 @@ void execute_command(char* input, char* cwd)
         {
             if (pipe(pipesfd + i * 2) == -1)
             {
-                _wstderr("ERROR: On pipe creation", true);
+                wstderr("ERROR: On pipe creation", true);
                 return;
             }
         }
@@ -198,7 +198,7 @@ void execute_command(char* input, char* cwd)
             const pid_t pid_child = fork();
             if (pid_child == -1)
             {
-                _wstderr("ERROR: Forking of current process failed", true);
+                wstderr("ERROR: Forking of current process failed", true);
                 return;
             }
             else if (pid_child == 0)
@@ -209,7 +209,7 @@ void execute_command(char* input, char* cwd)
                     // Set the stdin of this process to be certain end of a pipe (read end)
                     if (dup2(pipesfd[(i - 1) * 2], STDIN_FILENO) == -1)
                     {
-                        _wstderr("ERROR: dup2() failed", true);
+                        wstderr("ERROR: dup2() failed", true);
                         exit(EXIT_FAILURE);
                     }
                 }
@@ -219,7 +219,7 @@ void execute_command(char* input, char* cwd)
                     // Set the stdout of this process to be certain end of a pipe (write end)
                     if (dup2(pipesfd[i * 2 + 1], STDOUT_FILENO) == -1)
                     {
-                        _wstderr("ERROR: dup2() failed", true);
+                        wstderr("ERROR: dup2() failed", true);
                         exit(EXIT_FAILURE);
                     }
                 }
@@ -297,7 +297,7 @@ void execute_command(char* input, char* cwd)
         {
             if (waitpid(ch_procs_to_wait[i], NULL, 0) == -1)
             {
-                _wstderr("ERROR: waitpid() failed", true);
+                wstderr("ERROR: waitpid() failed", true);
             }
         }
     }
@@ -308,7 +308,7 @@ char** tokenize_single_command(char* sc)
     char** argv = malloc((MAX_TOKENS_PER_COMMAND + 1) * sizeof(char*));
     if (argv == NULL)
     {
-        _wstderr("ERROR: Failed to allocate memory", true);
+        wstderr("ERROR: Failed to allocate memory", true);
         exit(EXIT_FAILURE);
     }
     int argc = LOWEST_ARR_INDEX;
@@ -318,7 +318,8 @@ char** tokenize_single_command(char* sc)
         argv[argc++] = malloc(strlen(token) + 1);
         if (argv[argc - 1] == NULL)
         {
-            _wstderr("ERROR: Failed to allocate memory", true);
+            wstderr("ERROR: Failed to allocate memory", true);
+            free_recursively((void**)argv, -1);
             exit(EXIT_FAILURE);
         }
         strcpy(argv[argc - 1], token);
@@ -327,7 +328,8 @@ char** tokenize_single_command(char* sc)
     // Check if max amount of tokens were reached and more of them are available to consume
     if (argc == MAX_TOKENS_PER_COMMAND && token != NULL)
     {
-        _wstderr("ERROR: You surpassed the arguments limit for a command.\n", false);
+        wstderr("ERROR: You surpassed the arguments limit for a command.\n", false);
+        free_recursively((void**)argv, argc);
         exit(EXIT_FAILURE);
     }
     // Reached this line, the limits of argument were respected; "close" the argv list
@@ -342,14 +344,14 @@ void execute_batch_file(const char* path)
     char cwd[PATH_MAX];
     if (getcwd(cwd, PATH_MAX) == NULL)
     {
-        _wstderr("ERROR: cwd can't be retrieved", true);
+        wstderr("ERROR: cwd can't be retrieved", true);
         exit(EXIT_FAILURE);
     }
     // Open file
     FILE* file = fopen(path, "r");
     if (file == NULL)
     {
-        _wstderr("ERROR: Opening batch file", true);
+        wstderr("ERROR: Opening batch file", true);
         return;
     }
     char input[ARG_MAX];
@@ -370,14 +372,14 @@ int redirect_stdin(const char* file_name)
         int input_fd = open(file_name, O_RDONLY);
         if (input_fd == -1)
         {
-            _wstderr("ERROR: Failed to open input file", true);
+            wstderr("ERROR: Failed to open input file", true);
             exit(EXIT_FAILURE);
         }
         // duplicate the original file descriptor number to return if everything goes well
         int original_stdin = dup(STDIN_FILENO);
         if (dup2(input_fd, STDIN_FILENO) == -1)
         {
-            _wstderr("ERROR: Failed to redirect stdin", true);
+            wstderr("ERROR: Failed to redirect stdin", true);
             close(input_fd);
             exit(EXIT_FAILURE);
         }
@@ -395,14 +397,14 @@ int redirect_stdout(const char* file_name)
         int output_fd = open(file_name, O_WRONLY | O_CREAT | O_TRUNC, 0666);
         if (output_fd == -1)
         {
-            _wstderr("ERROR: Failed to open output file", true);
+            wstderr("ERROR: Failed to open output file", true);
             exit(EXIT_FAILURE);
         }
         // duplicate the original file descriptor number to return if everything goes well
         int original_stdin = dup(STDOUT_FILENO);
         if (dup2(output_fd, STDOUT_FILENO) == -1)
         {
-            _wstderr("ERROR: Failed to redirect stdout", true);
+            wstderr("ERROR: Failed to redirect stdout", true);
             close(output_fd);
             exit(EXIT_FAILURE);
         }
@@ -418,7 +420,7 @@ void restore_stdio(int original_stdio, int target_fd)
     {
         if (dup2(original_stdio, target_fd) == -1)
         {
-            _wstderr("ERROR: Failed to restore stdio", true);
+            wstderr("ERROR: Failed to restore stdio", true);
             close(original_stdio);
             exit(EXIT_FAILURE);
         }
@@ -445,14 +447,14 @@ void execute_cd(char* input, char** sc_tokens, bool background_execution, char* 
             if (old_cwd == NULL)
             {
                 errno = ENOENT;
-                _wstderr("ERROR: No such thing as 'OLDPWD' for now", true);
+                wstderr("ERROR: No such thing as 'OLDPWD' for now", true);
             }
             else
             {
                 // Old current directory exist, head to it if possible and update env
                 if (chdir(old_cwd) == -1)
                 {
-                    _wstderr("ERROR: Issue changing cwd to the old one", true);
+                    wstderr("ERROR: Issue changing cwd to the old one", true);
                 }
                 else
                 {
@@ -460,7 +462,7 @@ void execute_cd(char* input, char** sc_tokens, bool background_execution, char* 
                     setenv(ENV_OLDPWD_KEY, cwd, true);
                     if (getcwd(cwd, PATH_MAX) == NULL)
                     {
-                        _wstderr("ERROR: cwd can't be retrieved", true);
+                        wstderr("ERROR: cwd can't be retrieved", true);
                         exit(EXIT_FAILURE);
                     }
                 }
@@ -472,7 +474,7 @@ void execute_cd(char* input, char** sc_tokens, bool background_execution, char* 
             if (chdir(&input[CD_ARG_START_I]) == -1)
             {
                 // The argument is wrong or another problem appeared
-                _wstderr("ERROR: Can't change current working directory", true);
+                wstderr("ERROR: Can't change current working directory", true);
             }
             else
             {
@@ -480,7 +482,7 @@ void execute_cd(char* input, char** sc_tokens, bool background_execution, char* 
                 setenv(ENV_OLDPWD_KEY, cwd, true);
                 if (getcwd(cwd, PATH_MAX) == NULL)
                 {
-                    _wstderr("ERROR: cwd can't be retrieved", true);
+                    wstderr("ERROR: cwd can't be retrieved", true);
                     exit(EXIT_FAILURE);
                 }
             }
@@ -511,7 +513,7 @@ void execute_echo(char* input, char** sc_tokens, bool background_execution)
             if (env_val == NULL)
             {
                 // No env var with thy name or any other issue; errno doesn't get set
-                _wstderr("ERROR: Unexistent env var or empty arg provided.\n", false);
+                wstderr("ERROR: Unexistent env var or empty arg provided.\n", false);
             }
             else
             {
@@ -536,7 +538,7 @@ void execute_stop_monitor(int* metrics_pid)
     {
         if (kill(*metrics_pid, SIGTERM) == -1)
         {
-            _wstderr("ERROR: \"metrics\" child process can't be killed", true);
+            wstderr("ERROR: \"metrics\" child process can't be killed", true);
         }
         else
         {
@@ -558,7 +560,7 @@ void execute_status_monitor(const int* metrics_pid)
         sa.sa_restorer = NULL;
         if (sigaction(SIGUSR1, &sa, NULL) == -1)
         {
-            _wstderr("ERROR: Signal subscription failed", true);
+            wstderr("ERROR: Signal subscription failed", true);
         }
         else
         {
@@ -567,7 +569,7 @@ void execute_status_monitor(const int* metrics_pid)
             directive.sival_int = METRICS_GET_STATUS_CODE;
             if (sigqueue(*metrics_pid, SIGUSR1, directive) == -1)
             {
-                _wstderr("ERROR: Signaling \"status_monitor\"", true);
+                wstderr("ERROR: Signaling \"status_monitor\"", true);
             }
             else
             {
@@ -585,7 +587,7 @@ void execute_status_monitor(const int* metrics_pid)
                     }
                     else if (difftime(l_current_t, l_start_t) >= WAIT_T_FOR_METRICS_RESPONSE)
                     {
-                        _wstderr("ERROR: Timeout reached. No response from \"metrics\" app.\n", false);
+                        wstderr("ERROR: Timeout reached. No response from \"metrics\" app.\n", false);
                         break;
                     }
                 }
@@ -595,7 +597,7 @@ void execute_status_monitor(const int* metrics_pid)
             sa.sa_handler = SIG_DFL;
             if (sigaction(SIGUSR1, &sa, NULL) == -1)
             {
-                _wstderr("ERROR: Signal unsubscription failed", true);
+                wstderr("ERROR: Signal unsubscription failed", true);
             }
         }
     }
@@ -620,7 +622,7 @@ void execute_external_cmd(char** sc_tokens, bool background_execution)
     if (execvp(sc_tokens[SC_FIRST_ARG_I], sc_tokens) == -1)
     {
         // Something went wrong
-        _wstderr("ERROR: Command couldn't be executed", true);
+        wstderr("ERROR: Command couldn't be executed", true);
         exit(EXIT_FAILURE);
     }
 }
@@ -658,7 +660,7 @@ void handle_sigusr1(int sig, siginfo_t* info, void* context)
     sfmh = true;
 }
 
-void _wstderr(const char* s, bool use_perror)
+void wstderr(const char* s, bool use_perror)
 {
     if (use_perror)
     {
@@ -673,7 +675,7 @@ void _wstderr(const char* s, bool use_perror)
     usleep(TERMINAL_FLUSH_DELAY);
 }
 
-void _free_recursively(void** arr, int limit)
+void free_recursively(void** arr, int limit)
 {
     // free memory prev allocated and get out
     for (int i = LOWEST_ARR_INDEX; limit == -1 ? arr[i] != NULL : i < limit; i++)

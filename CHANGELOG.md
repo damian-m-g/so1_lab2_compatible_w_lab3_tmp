@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.5] - 2024-11-23
+
+### Fixed
+
+- Those functions named starting with "_", as that kind of naming is reserved to Unix kernel functions.
+
 ## [1.0.4] - 2024-11-23
 
 ### Fixed

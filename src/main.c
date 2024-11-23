@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
     if (argc > APP_MAX_ARGC)
     {
         // Make the user know that this shell accept 0 or 1 argument
-        _wstderr("ERROR: This shell only takes 1 arg (path to a batch file), or 0 (start shell).\n", false);
+        wstderr("ERROR: This shell only takes 1 arg (path to a batch file), or 0 (start shell).\n", false);
     }
     else if (argc == APP_MAX_ARGC)
     {

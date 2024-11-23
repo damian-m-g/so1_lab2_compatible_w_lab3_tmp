@@ -188,7 +188,7 @@ void handle_sigusr1(int sig, siginfo_t* info, void* context);
  * @param use_perror Pass true to use perror(), pass false to use fwrite() to stderr. Do not pass true if errno
  * wasn't set by the code throwing an error.
  */
-void _wstderr(const char* s, bool use_perror);
+void wstderr(const char* s, bool use_perror);
 
 /**
  * @brief Auxiliary function to free dinamycally allocated memory recursively.
@@ -196,6 +196,6 @@ void _wstderr(const char* s, bool use_perror);
  * @param limit The limit at which stop to free elements of the upmost array. Pass -1 as the limit to free until
  * a NULL value is found.
  */
-void _free_recursively(void** arr, int limit);
+void free_recursively(void** arr, int limit);
 
 #endif
