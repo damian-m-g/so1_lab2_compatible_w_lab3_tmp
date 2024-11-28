@@ -94,3 +94,71 @@ void cleanse_redirections_on_sc(char* sc)
         sc[sc_len - 1] = STR_NULL_TERMINATOR;
     }
 }
+
+void traverse_directory(const char* dir_path)
+{
+    // Open the directory file, to interpret its metadata
+    DIR* dir = opendir(dir_path);
+    struct dirent* entry;
+    char path[PATH_MAX];
+    // Sanity check
+    if (!dir)
+    {
+        perror("ERROR: Couldn't open the dir provided");
+        return;
+    }
+    printf("Explorando el dir: \"%s\" en busca de archivos *.{config|json} ...\n", dir_path);
+    // Actually traverse all its content
+    while ((entry = readdir(dir)) != NULL)
+    {
+        // Skip "." and ".."
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+        {
+            continue;
+        }
+        // Build the full path
+        snprintf(path, sizeof(path), "%s/%s", dir_path, entry->d_name);
+        // Check if it's a directory
+        struct stat stat_buffer;
+        if (stat(path, &stat_buffer) == 0 && S_ISDIR(stat_buffer.st_mode))
+        {
+            // If it's a directory, recurse into it
+            traverse_directory(path);
+        }
+        // Check if it's a regular file and has a valid extension
+        else if (S_ISREG(stat_buffer.st_mode) && is_config_file(entry->d_name))
+        {
+            printf("Archivo de configuración encontrado: \"%s\".\n", path);
+            // Open the file
+            FILE* file = fopen(path, "r");
+            if (file)
+            {
+                // Print the file content to stdout
+                char buffer[READING_BUFFER];
+                size_t bytes_read;
+                printf("Contenido de \"%s\":\n", path);
+                while ((bytes_read = fread((void*)buffer, sizeof(char), sizeof(buffer), file)) > 0)
+                {
+                    fwrite((void*)buffer, sizeof(char), bytes_read, stdout);
+                }
+                fclose(file);
+                printf("\n");
+                // Force the stdout flush
+                fflush(stderr);
+            }
+            else
+            {
+                perror("ERROR: On config file opening for reading purpose.");
+                // Doesn't exist, just continues with the next entry ...
+            }
+        }
+    }
+    // Close the dir file opened
+    closedir(dir);
+}
+
+bool is_config_file(const char* filename)
+{
+    const char* ext = strrchr(filename, '.');
+    return ext && ((strcmp(ext, ".json") == 0 || strcmp(ext, ".config") == 0));
+}

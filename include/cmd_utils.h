@@ -6,8 +6,12 @@
 #ifndef CMD_UTILS_H
 #define CMD_UTILS_H
 
+#include <dirent.h>
+#include <linux/limits.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
 
 //! \brief Lowest array index.
 #define LOWEST_ARR_INDEX 0
@@ -15,6 +19,8 @@
 #define AMP_MIN_INDEX_APPEARANCE 2
 //! \brief Any string null terminator. Stablish the end of a string.
 #define STR_NULL_TERMINATOR '\0'
+//! \brief Buffer (in bytes) to use for read/write operations.
+#define READING_BUFFER 1024
 
 /**
  * @brief Checks for "&" existence at the end of the command, "removing" it from the tokens array.
@@ -56,5 +62,18 @@ void cleanse_redirections_on_argv(char** argv);
  * @param sc Raw single command. Could modify it.
  */
 void cleanse_redirections_on_sc(char* sc);
+
+/**
+ * @brief Traverses a valid dir in search for certain config files (*.config & *.json) showing its content on stdout.
+ * @param dir_path Path to an existent directory.
+ */
+void traverse_directory(const char* dir_path);
+
+/**
+ * @brief Check if the file name provided has the requested extension to be considered a config file.
+ * @param filename File base name.
+ * @return true if the file is considered a config file, false otherwise.
+ */
+bool is_config_file(const char* filename);
 
 #endif

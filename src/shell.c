@@ -118,6 +118,10 @@ void execute_command(char* input, char* cwd)
         {
             execute_status_monitor(&metrics_pid);
         }
+        else if (strcmp(sc_tokens[LOWEST_ARR_INDEX], "explore_filesystem") == 0)
+        {
+            execute_explore_filesystem(sc_tokens);
+        }
         else
         {
             // Potential external or monitor-related command invocation
@@ -265,6 +269,10 @@ void execute_command(char* input, char* cwd)
                 else if (strcmp(sc_tokens[LOWEST_ARR_INDEX], "status_monitor") == 0)
                 {
                     execute_status_monitor(&metrics_pid);
+                }
+                else if (strcmp(sc_tokens[LOWEST_ARR_INDEX], "explore_filesystem") == 0)
+                {
+                    execute_explore_filesystem(sc_tokens);
                 }
                 else
                 {
@@ -607,6 +615,36 @@ void execute_status_monitor(const int* metrics_pid)
     }
 }
 
+void execute_explore_filesystem(char** sc_tokens)
+{
+    // The first arg of the cmd is only taken into account and must exist
+    if (!sc_tokens[SC_FIRST_ARG_I])
+    {
+        wstderr("ERROR: This command needs a path to a dir as a lone arg.\n", false);
+        return;
+    }
+    // Argument provided
+    const char* path = sc_tokens[SC_FIRST_ARG_I];
+    struct stat stat_buffer;
+    // Check path existence, and if it's in fact a dir, which is what's expected
+    if (stat(path, &stat_buffer) == 0)
+    {
+        if (S_ISDIR(stat_buffer.st_mode))
+        {
+            // Path exist and it's a dir
+            traverse_directory(path);
+        }
+        else
+        {
+            wstderr("ERROR: The path provided isn't a dir.\n", false);
+        }
+    }
+    else
+    {
+        wstderr("ERROR: Provided path to a potential dir doesn't exist.\n", false);
+    }
+}
+
 void execute_external_cmd(char** sc_tokens, bool background_execution)
 {
     // If this child proc is being executed in the foreground, certain signals must respond
@@ -619,7 +657,7 @@ void execute_external_cmd(char** sc_tokens, bool background_execution)
         }
     }
     // Execute this child, pass the torch of the proc to another program
-    if (execvp(sc_tokens[SC_FIRST_ARG_I], sc_tokens) == -1)
+    if (execvp(sc_tokens[LOWEST_ARR_INDEX], sc_tokens) == -1)
     {
         // Something went wrong
         wstderr("ERROR: Command couldn't be executed", true);

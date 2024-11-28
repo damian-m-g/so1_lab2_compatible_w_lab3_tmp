@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.6] - 2024-11-28
+
+### Added
+
+- Activity 2.3 of lab3 implemented: Exploración del filesystem y búsqueda de configuraciones. Se hizo a través del
+nuevo comando interno `explore_filesystem`, que necesita un argumento: el path a un dir a recorrer.
+
+### Fixed
+
+- Bug on `execute_external_cmd()`.
+
 ## [1.0.5] - 2024-11-23
 
 ### Fixed

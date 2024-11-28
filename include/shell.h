@@ -11,12 +11,12 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <getopt.h>
-#include <linux/limits.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
 #include <wait.h>
@@ -45,6 +45,8 @@
 #define N_SINGALS_TO_HANDLE 4
 //! \brief Signals handled or not, depending on the process currently executed.
 static const int signals[N_SINGALS_TO_HANDLE] = {SIGINT, SIGTERM, SIGTSTP, SIGQUIT};
+//! \brief GNU/Linux bytes of args + environ for exec() family of functions.
+#define ARG_MAX 131072
 //! \brief Maximum number of single commands to execute, given the max length allowed for an absolute command.
 #define MAX_SINGLE_COMMANDS (ARG_MAX / 4)
 //! \brief Path to the metrics (lab #1) app.
@@ -166,6 +168,13 @@ void execute_stop_monitor(int* metrics_pid);
  * @param metrics_pid The "metrics" app process id.
  */
 void execute_status_monitor(const int* metrics_pid);
+
+/**
+ * @brief Executes the "explore_filesystem" internal command, which needs a single arg: a path to a dir. It explores
+ * recursively the dir, looking for *.config and *.json files. Reading each one content and showing it in the shell.
+ * @param sc_tokens Single command tokens.
+ */
+void execute_explore_filesystem(char** sc_tokens);
 
 /**
  * @brief Potential external command execution.
